@@ -120,8 +120,14 @@ const DET = Object.fromEntries(DATA.details.map(d=>[d.id,d]));
 const DET_ORDER = DATA.details.map(d=>d.id);
 function rgb(c,a){ return a==null?`rgb(${c[0]},${c[1]},${c[2]})`:`rgba(${c[0]},${c[1]},${c[2]},${a})`; }
 function esc(s){ return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
-function sortKey(id){ const m=/^(\d+)(.*)$/.exec(id); return [parseInt(m[1],10), m[2]]; }
-function cmpId(a,b){ const [na,ra]=sortKey(a),[nb,rb]=sortKey(b); return na-nb || (ra<rb?-1:ra>rb?1:0); }
+function sortKey(id){ return String(id).match(/\d+|\D+/g) || [String(id)]; }
+function cmpId(a,b){ const pa=sortKey(a), pb=sortKey(b), len=Math.max(pa.length,pb.length);
+  for(let i=0;i<len;i++){ const ta=pa[i], tb=pb[i];
+    if(ta===undefined) return -1; if(tb===undefined) return 1;
+    const na=/^\d+$/.test(ta), nb=/^\d+$/.test(tb);
+    if(na&&nb){ const d=parseInt(ta,10)-parseInt(tb,10); if(d) return d; if(ta.length!==tb.length) return ta.length-tb.length; }
+    else { if(ta<tb) return -1; if(ta>tb) return 1; } }
+  return 0; }
 
 /* ---------- zoom / pan viewer ---------- */
 function makeViewer(el, srcKey, opts){
@@ -133,7 +139,13 @@ function makeViewer(el, srcKey, opts){
   ctl.innerHTML='<button class="wide" data-a="fit" title="Fit">FIT</button><button data-a="minus">−</button><button data-a="plus">+</button><button class="wide" data-a="tall">⤢</button>';
   let scale=1,minS=1,tx=0,ty=0,iw=0,ih=0,cw=0,ch=0;
   const ptrs=new Map(); let pinch=null, lastTap=0, moved=0, downPt=null;
-  function apply(){ const t=`translate(${tx}px,${ty}px) scale(${scale})`; img.style.transform=t; ov.style.transform=t; }
+  function apply(){ const t=`translate(${tx}px,${ty}px) scale(${scale})`; img.style.transform=t; ov.style.transform=t;
+    /* At fit scale there is nothing to pan (the whole image already fits), so let the browser
+       scroll the page normally (pan-y) instead of trapping the gesture. Only once the user has
+       actually zoomed in past fit do we take exclusive control (none) for pinch/pan. This is what
+       was behind the "zoom and scroll down" complaint: the viewer used to swallow every touch at
+       fit scale and do nothing with it. */
+    el.style.touchAction = (scale<=minS*1.01) ? 'pan-y' : 'none'; }
   function clamp(){ const maxS=Math.max(minS*10,8); scale=Math.max(minS,Math.min(scale,maxS));
     const w=iw*scale,h=ih*scale; tx=(w<=cw)?(cw-w)/2:Math.min(0,Math.max(cw-w,tx)); ty=(h<=ch)?(ch-h)/2:Math.min(0,Math.max(ch-h,ty)); }
   function fit(){ cw=el.clientWidth; ch=el.clientHeight; minS=Math.min(cw/iw,ch/ih); scale=minS; clamp(); apply(); }
@@ -152,13 +164,15 @@ function makeViewer(el, srcKey, opts){
     if(opts.initial){ const z=opts.initial; scale=minS*z.scale; tx=-z.x*scale+cw/2; ty=-z.y*scale+ch/2; clamp(); apply(); } };
   img.onerror=()=>{ el.innerHTML='<div class="loading">Image not available / Imagen no disponible</div>'; };
   img.src=imgSrc(srcKey);
-  el.addEventListener('pointerdown',e=>{ el.setPointerCapture(e.pointerId); ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); moved=0; downPt={x:e.clientX,y:e.clientY};
-    if(ptrs.size===2){ const a=[...ptrs.values()]; pinch={d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y), mx:(a[0].x+a[1].x)/2, my:(a[0].y+a[1].y)/2}; } e.preventDefault(); });
+  el.addEventListener('pointerdown',e=>{ try{ el.setPointerCapture(e.pointerId); }catch(err){} ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); moved=0; downPt={x:e.clientX,y:e.clientY};
+    if(ptrs.size===2){ const a=[...ptrs.values()]; pinch={d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y), mx:(a[0].x+a[1].x)/2, my:(a[0].y+a[1].y)/2}; e.preventDefault(); }
+    else if(scale>minS*1.01){ e.preventDefault(); } /* at fit scale, 1 finger: don't block it, let the page scroll */ });
   el.addEventListener('pointermove',e=>{ if(!ptrs.has(e.pointerId)) return; const p=ptrs.get(e.pointerId); const r=el.getBoundingClientRect();
-    if(ptrs.size===1){ tx+=e.clientX-p.x; ty+=e.clientY-p.y; moved+=Math.abs(e.clientX-p.x)+Math.abs(e.clientY-p.y); p.x=e.clientX; p.y=e.clientY; clamp(); apply(); }
+    if(ptrs.size===1){ const dx=e.clientX-p.x, dy=e.clientY-p.y;
+      if(scale<=minS*1.01){ moved+=Math.abs(dx)+Math.abs(dy); p.x=e.clientX; p.y=e.clientY; return; } /* nothing to pan; let native scroll run */
+      tx+=dx; ty+=dy; moved+=Math.abs(dx)+Math.abs(dy); p.x=e.clientX; p.y=e.clientY; clamp(); apply(); e.preventDefault(); }
     else if(ptrs.size===2 && pinch){ p.x=e.clientX; p.y=e.clientY; const a=[...ptrs.values()]; const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y); const mx=(a[0].x+a[1].x)/2, my=(a[0].y+a[1].y)/2;
-      zoomAt(d/pinch.d, mx-r.left, my-r.top); tx+=mx-pinch.mx; ty+=my-pinch.my; clamp(); apply(); pinch={d:d,mx:mx,my:my}; moved+=10; }
-    e.preventDefault(); });
+      zoomAt(d/pinch.d, mx-r.left, my-r.top); tx+=mx-pinch.mx; ty+=my-pinch.my; clamp(); apply(); pinch={d:d,mx:mx,my:my}; moved+=10; e.preventDefault(); } });
   function up(e){ if(ptrs.has(e.pointerId)){ ptrs.delete(e.pointerId); if(ptrs.size<2) pinch=null;
       if(ptrs.size===0 && moved<8 && downPt){ const now=Date.now(); const r=el.getBoundingClientRect();
         if(now-lastTap<320){ if(scale>minS*1.05){ fit(); } else { zoomAt(3, e.clientX-r.left, e.clientY-r.top); } lastTap=0; } else lastTap=now; } } }
@@ -284,7 +298,7 @@ function renderAll(app, qs){ setBB('all');
   app.innerHTML = header({label:'Plan',fn:"go('#home')"}, 'All connections', `${DATA.details.length} detail sheets · Todas las conexiones`, '#1e73be') + `
   <div class="wrap"><div class="card">
     <input class="srch" id="srch" placeholder="Filter by number, e.g. 7B or 13 / Filtrar por número" oninput="filterList(this.value)">
-    <div id="list">${fams.map(f=>`<div class="fam">${esc(f.title)}</div>`+f.ids.map(id=>connCard(DET[id], null, null)).join('')).join('')}</div>
+    <div id="list">${fams.map(f=>`<div class="fam">${esc(f.title)}</div>`+[...f.ids].sort(cmpId).map(id=>connCard(DET[id], null, null)).join('')).join('')}</div>
   </div></div>`;
 }
 render();
@@ -295,7 +309,30 @@ render();
 // use on the jobsite. Works the same on iPhone and Android; no app store, no account.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+    navigator.serviceWorker.register('service-worker.js').then((reg) => {
+      // Actively check for a newer version every time the app is opened, instead of
+      // waiting for the browser's own update schedule - on a phone added to the home
+      // screen (no browser tab, no refresh button) that schedule can be very lazy and
+      // the crew can be stuck on an old cached version for a long time without knowing.
+      reg.update().catch(() => {});
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller && !window._nfReloaded) {
+            // A newer version just finished installing over an already-running app:
+            // reload once, automatically, so the fix shows up with no steps for the crew.
+            window._nfReloaded = true;
+            window.location.reload();
+          }
+        });
+      });
+    }).catch(() => {});
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      navigator.serviceWorker.getRegistration().then((reg) => reg && reg.update()).catch(() => {});
+    }
   });
 }
 (function () {
