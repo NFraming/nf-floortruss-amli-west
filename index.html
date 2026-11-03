@@ -21,6 +21,7 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);font-family:-
 button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer}
 .hdr{position:sticky;top:0;z-index:20;background:var(--nf);color:#fff;padding:env(safe-area-inset-top,0) 0 0 0;box-shadow:0 2px 6px rgba(0,0,0,.25)}
 .hdr .row{display:flex;align-items:center;gap:8px;padding:10px 12px;min-height:56px}
+.hdr .logo{flex:0 0 auto;height:38px;width:38px;display:block}
 .hdr .back{flex:0 0 auto;display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.14);border-radius:10px;padding:10px 12px;font-weight:600;min-height:44px}
 .hdr .ttl{flex:1 1 auto;min-width:0}
 .hdr .ttl .t1{font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -179,7 +180,7 @@ function decId(s){ return String(s).replace(/-/g,'.'); }
 function parseRoute(){ const h=(location.hash||'#home').slice(1); const parts=h.split('--'); const view=parts[0]||'home'; let arg=parts[1]||null; if(view==='det'&&arg) arg=decId(arg); const qs={}; if(parts[2]) qs.from=parts[2]; return {view, arg, qs}; }
 
 function header(back, t1, t2, color){
-  return `<div class="hdr"><div class="row">${back?`<button class="back" onclick="${esc(back.fn)}">◀ ${esc(back.label)}</button>`:''}<div class="ttl"><div class="t1">${t1}</div><div class="t2">${t2}</div></div></div><div class="stripe" style="background:${color||'#1e73be'}"></div></div>`;
+  return `<div class="hdr"><div class="row"><img class="logo" src="header-mark.png" alt="National Framing"${back?'':' style="margin-right:2px"'}>${back?`<button class="back" onclick="${esc(back.fn)}">◀ ${esc(back.label)}</button>`:''}<div class="ttl"><div class="t1">${t1}</div><div class="t2">${t2}</div></div></div><div class="stripe" style="background:${color||'#1e73be'}"></div></div>`;
 }
 function setBB(which){ for(const k of ['home','secs','all']){ const b=document.getElementById('bb-'+k); if(b) b.classList.toggle('on',k===which);} }
 
@@ -195,7 +196,7 @@ function renderHome(app){ setBB('home'); const T=DATA.title; const fp=DATA.fullp
   let labels=DATA.sections.map(s=>`<button class="lbl" style="left:${s.cx}%;top:${s.cy}%;border-color:${rgb(s.color)}" onclick="event.stopPropagation();go('#sec--${s.id}')">${esc(s.label)}</button>`).join('');
   app.innerHTML = header(null, '4TH LEVEL – FLOOR TRUSS CONNECTIONS', T.job+' · '+T.company, '#1e73be') + `
   <div class="wrap">
-    <div class="card title-card"><div class="big">4th Level – Floor Truss Connections</div><div class="sub">${esc(T.job)} · West Building · Buildings #3, #4 and #5</div><div class="meta">${esc(T.company)} · Rev 1 · ${esc(T.date)} · Created by ${esc(T.author)} · Phone version v1 (2026-11-02)</div></div>
+    <div class="card title-card"><img src="header-logo.png" alt="National Framing Inc" style="height:46px;width:auto;border-radius:8px;margin-bottom:10px;display:block"><div class="big">4th Level – Floor Truss Connections</div><div class="sub">${esc(T.job)} · West Building · Buildings #3, #4 and #5</div><div class="meta">${esc(T.company)} · Rev 1 · ${esc(T.date)} · Created by ${esc(T.author)} · Phone version v1 (2026-11-02)</div></div>
     <div class="card"><h2>Full plan – 4th level <small>Plano completo – nivel 4. Tap a section / Toca una sección.</small></h2>
       <div class="plan" id="plan" onclick="planTap(event)"><img id="planimg" src="${imgSrc('fullplan')}" alt="Full plan">${labels}</div>
       <div class="legend">${DATA.sections.map(s=>`<span class="pill" onclick="go('#sec--${s.id}')"><span class="dot" style="background:${rgb(s.color)}"></span>${esc(s.label)}</span>`).join('')}</div>
