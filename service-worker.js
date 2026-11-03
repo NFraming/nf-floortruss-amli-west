@@ -1,0 +1,161 @@
+// AMLI West - Floor Truss Connections - service worker
+// Cache-first offline app shell + all section/detail images, so the app works with
+// zero network after the first successful load (iOS and Android alike).
+const CACHE_VERSION = 'nf-floortruss-v2-1';
+const PRECACHE_URLS = [
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./icon-512.png",
+  "./icon-192.png",
+  "./icon-180.png",
+  "./icon-167.png",
+  "./icon-152.png",
+  "img/fullplan.webp",
+  "img/fullplan_index.png",
+  "img/p009.webp",
+  "img/p010.webp",
+  "img/p011.webp",
+  "img/p012.webp",
+  "img/p013.webp",
+  "img/p014.webp",
+  "img/p015.webp",
+  "img/p016.webp",
+  "img/p017.webp",
+  "img/p018.webp",
+  "img/p019.webp",
+  "img/p020.webp",
+  "img/p021.webp",
+  "img/p022.webp",
+  "img/p023.webp",
+  "img/p024.webp",
+  "img/p025.webp",
+  "img/p026.webp",
+  "img/p027.webp",
+  "img/p028.webp",
+  "img/p029.webp",
+  "img/p030.webp",
+  "img/p031.webp",
+  "img/p032.webp",
+  "img/p033.webp",
+  "img/p034.webp",
+  "img/p035.webp",
+  "img/p036.webp",
+  "img/p037.webp",
+  "img/p038.webp",
+  "img/p039.webp",
+  "img/p040.webp",
+  "img/p041.webp",
+  "img/p042.webp",
+  "img/p043.webp",
+  "img/p044.webp",
+  "img/p045.webp",
+  "img/p046.webp",
+  "img/p047.webp",
+  "img/p048.webp",
+  "img/p049.webp",
+  "img/p050.webp",
+  "img/p051.webp",
+  "img/p052.webp",
+  "img/p053.webp",
+  "img/p054.webp",
+  "img/p055.webp",
+  "img/p056.webp",
+  "img/p057.webp",
+  "img/p058.webp",
+  "img/p059.webp",
+  "img/p060.webp",
+  "img/p061.webp",
+  "img/p062.webp",
+  "img/p063.webp",
+  "img/p064.webp",
+  "img/p065.webp",
+  "img/p066.webp",
+  "img/p067.webp",
+  "img/p068.webp",
+  "img/p069.webp",
+  "img/p070.webp",
+  "img/p071.webp",
+  "img/p072.webp",
+  "img/p073.webp",
+  "img/p074.webp",
+  "img/p075.webp",
+  "img/p076.webp",
+  "img/p077.webp",
+  "img/p078.webp",
+  "img/p079.webp",
+  "img/p080.webp",
+  "img/p081.webp",
+  "img/p082.webp",
+  "img/p083.webp",
+  "img/p084.webp",
+  "img/p085.webp",
+  "img/p086.webp",
+  "img/p087.webp",
+  "img/p088.webp",
+  "img/p089.webp",
+  "img/p090.webp",
+  "img/p091.webp",
+  "img/p092.webp",
+  "img/p093.webp",
+  "img/p094.webp",
+  "img/p095.webp",
+  "img/p096.webp",
+  "img/p097.webp",
+  "img/p098.webp",
+  "img/p099.webp",
+  "img/p100.webp",
+  "img/p101.webp",
+  "img/p102.webp",
+  "img/p103.webp",
+  "img/p104.webp",
+  "img/p105.webp",
+  "img/p106.webp",
+  "img/p107.webp",
+  "img/p108.webp",
+  "img/p109.webp",
+  "img/p110.webp",
+  "img/p111.webp",
+  "img/sec1.webp",
+  "img/sec2.webp",
+  "img/sec3.webp",
+  "img/sec4.webp",
+  "img/sec5.webp",
+  "img/sec6.webp",
+  "img/sec7.webp",
+  "img/sec8.webp"
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_VERSION).then((cache) => cache.addAll(PRECACHE_URLS))
+      .then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((names) => Promise.all(
+      names.filter((n) => n !== CACHE_VERSION).map((n) => caches.delete(n))
+    )).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request).then((resp) => {
+        if (resp && resp.status === 200 && resp.type === 'basic') {
+          const copy = resp.clone();
+          caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, copy));
+        }
+        return resp;
+      }).catch(() => {
+        // Offline and not in cache: for a navigation request, fall back to the app shell.
+        if (event.request.mode === 'navigate') return caches.match('./index.html');
+      });
+    })
+  );
+});
