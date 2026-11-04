@@ -138,6 +138,7 @@ function makeViewer(el, srcKey, opts){
   const ctl=document.createElement('div'); ctl.className='ctl';
   ctl.innerHTML='<button class="wide" data-a="fit" title="Fit">FIT</button><button data-a="minus">−</button><button data-a="plus">+</button><button class="wide" data-a="tall">⤢</button>';
   let scale=1,minS=1,tx=0,ty=0,iw=0,ih=0,cw=0,ch=0;
+  const CTRL_RESERVE=60; /* px reserved at the bottom of the viewer so the FIT/-/+/expand controls never sit on top of the sheet (table/notes); fit() treats this as outside the usable image area, and clamp() uses the same ch, so panning can never slide content under the controls either. */
   const ptrs=new Map(); let pinch=null, lastTap=0, moved=0, downPt=null;
   function apply(){ const t=`translate(${tx}px,${ty}px) scale(${scale})`; img.style.transform=t; ov.style.transform=t;
     /* At fit scale there is nothing to pan (the whole image already fits), so let the browser
@@ -148,7 +149,7 @@ function makeViewer(el, srcKey, opts){
     el.style.touchAction = (scale<=minS*1.01) ? 'pan-y' : 'none'; }
   function clamp(){ const maxS=Math.max(minS*10,8); scale=Math.max(minS,Math.min(scale,maxS));
     const w=iw*scale,h=ih*scale; tx=(w<=cw)?(cw-w)/2:Math.min(0,Math.max(cw-w,tx)); ty=(h<=ch)?(ch-h)/2:Math.min(0,Math.max(ch-h,ty)); }
-  function fit(){ cw=el.clientWidth; ch=el.clientHeight; minS=Math.min(cw/iw,ch/ih); scale=minS; clamp(); apply(); }
+  function fit(){ cw=el.clientWidth; ch=Math.max(el.clientHeight-CTRL_RESERVE,120); minS=Math.min(cw/iw,ch/ih); scale=minS; clamp(); apply(); }
   function zoomAt(f,x,y){ const ns=Math.max(minS,Math.min(scale*f,Math.max(minS*10,8))); const r=ns/scale; tx=x-(x-tx)*r; ty=y-(y-ty)*r; scale=ns; clamp(); apply(); }
   img.onload=()=>{ iw=img.naturalWidth; ih=img.naturalHeight; el.innerHTML=''; el.appendChild(img);
     if(opts.taps && opts.taps.length){ ov.style.width=iw+'px'; ov.style.height=ih+'px'; ov.innerHTML='';
