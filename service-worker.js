@@ -1,7 +1,7 @@
 // AMLI West - Floor Truss Connections - service worker
 // Cache-first offline app shell + all section/detail images, so the app works with
 // zero network after the first successful load (iOS and Android alike).
-const CACHE_VERSION = 'nf-floortruss-v2-7';
+const CACHE_VERSION = 'nf-floortruss-v2-8';
 const PRECACHE_URLS = [
   "./",
   "./index.html",
@@ -126,11 +126,32 @@ const PRECACHE_URLS = [
   "img/sec6.webp",
   "img/sec7.webp",
   "img/sec8.webp",
-  "img/swp1.webp",
-  "img/swp2.webp",
-  "img/swp3.webp",
-  "img/swp4.webp",
-  "img/swp5.webp"
+  "img/sw4_5AB.webp",
+  "img/sw4_4D.webp",
+  "img/sw4_4C.webp",
+  "img/sw4_4B.webp",
+  "img/sw4_4A.webp",
+  "img/sw4_3C.webp",
+  "img/sw4_3B.webp",
+  "img/sw4_3A.webp",
+  "img/sw5_5B.webp",
+  "img/sw5_5A.webp",
+  "img/sw5_4D.webp",
+  "img/sw5_4C.webp",
+  "img/sw5_4B.webp",
+  "img/sw5_4A.webp",
+  "img/sw5_3C.webp",
+  "img/sw5_3B.webp",
+  "img/sw5_3A.webp",
+  "img/sw6_5B.webp",
+  "img/sw6_5A.webp",
+  "img/sw6_4D.webp",
+  "img/sw6_4C.webp",
+  "img/sw6_4B.webp",
+  "img/sw6_4A.webp",
+  "img/sw6_3C.webp",
+  "img/sw6_3B.webp",
+  "img/sw6_3A.webp"
 ];
 
 self.addEventListener('install', (event) => {
