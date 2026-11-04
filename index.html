@@ -118,6 +118,19 @@ function imgSrc(key){ return IMG[key]; }
 const SEC = Object.fromEntries(DATA.sections.map(s=>[s.id,s]));
 const DET = Object.fromEntries(DATA.details.map(d=>[d.id,d]));
 const DET_ORDER = DATA.details.map(d=>d.id);
+/* ---------- Shearwall blocks removed — placeholder scaffold, same pattern as Sections/Details ----------
+   Jorge Lugo is preparing the real callouts/sheets (sent separately). Until sw_sections/sw_blocks have
+   entries, the Home card links to a ready "coming soon" page instead of a broken one. Fill both arrays
+   with the same shapes as DATA.sections / DATA.details (see README_build.md, same 8-step pipeline) once
+   his data lands — nothing else here needs to change. */
+const SWDATA = {
+  meta: { title_en:'Shearwall blocks removed', title_es:'Cuadros de shearwall removidos', status:'pending_data' },
+  sw_sections: [],
+  sw_blocks: []
+};
+const SEC_SW = Object.fromEntries(SWDATA.sw_sections.map(s=>[s.id,s]));
+const DET_SW = Object.fromEntries(SWDATA.sw_blocks.map(d=>[d.id,d]));
+const DET_SW_ORDER = SWDATA.sw_blocks.map(d=>d.id);
 function rgb(c,a){ return a==null?`rgb(${c[0]},${c[1]},${c[2]})`:`rgba(${c[0]},${c[1]},${c[2]},${a})`; }
 function esc(s){ return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
 function sortKey(id){ return String(id).match(/\d+|\D+/g) || [String(id)]; }
@@ -204,6 +217,9 @@ function render(){ const r=parseRoute(); const app=document.getElementById('app'
   if(r.view==='sec' && SEC[r.arg]) renderSection(app, SEC[r.arg], r.qs);
   else if(r.view==='det' && DET[r.arg]) renderDetail(app, DET[r.arg], r.qs);
   else if(r.view==='all') renderAll(app, r.qs);
+  else if(r.view==='swsec' && SEC_SW[r.arg]) renderSWSection(app, SEC_SW[r.arg], r.qs);
+  else if(r.view==='swdet' && DET_SW[r.arg]) renderSWDetail(app, DET_SW[r.arg], r.qs);
+  else if(r.view==='swall') renderSWAll(app, r.qs);
   else renderHome(app);
 }
 
@@ -222,6 +238,10 @@ function renderHome(app){ setBB('home'); const T=DATA.title; const fp=DATA.fullp
     </div>
     <div class="card"><h2>All connection details <small>Todos los detalles de conexión (${DATA.details.length} sheets)</small></h2>
       <button class="btn" onclick="go('#all')">Open the full list → · Abrir la lista completa</button>
+    </div>
+    <div class="card"><h2>Shearwall blocks removed <small>Cuadros de shearwall removidos</small></h2>
+      <button class="btn" onclick="go('#swall')">Open · Abrir</button>
+      ${DET_SW_ORDER.length?'':'<div class="hint">Jorge Lugo is preparing this data — the page is ready and will fill in automatically. / Jorge Lugo está preparando esta información — la página ya está lista y se llenará sola.</div>'}
     </div>
     <div class="card"><details class="notes"><summary>Notes from the plan · Notas del plano</summary><ol>${DATA.notes.map(n=>`<li>${esc(n.en)}<span class="es">${esc(n.es)}</span></li>`).join('')}</ol></details></div>
     <div class="foot">Built from "4th Level - Floor Truss Connections - AMLI West.pdf" (111 pages, 30/10/26). National Framing · 2026-11-02.</div>
@@ -300,6 +320,67 @@ function renderAll(app, qs){ setBB('all');
   <div class="wrap"><div class="card">
     <input class="srch" id="srch" placeholder="Filter by number, e.g. 7B or 13 / Filtrar por número" oninput="filterList(this.value)">
     <div id="list">${fams.map(f=>`<div class="fam">${esc(f.title)}</div>`+[...f.ids].sort(cmpId).map(id=>connCard(DET[id], null, null)).join('')).join('')}</div>
+  </div></div>`;
+}
+
+/* ---------- Shearwall blocks removed — views (same pattern as Sections/Details/All above) ---------- */
+function swBlockCard(d, secId, countHere){
+  const col=d.color?rgb(d.color):'#999';
+  const secs=Object.keys(d.sections||{}).sort((a,b)=>SWDATA.sw_sections.findIndex(s=>s.id===a)-SWDATA.sw_sections.findIndex(s=>s.id===b));
+  const vtxt = d.variant?`<span class="v">(${esc(d.variant)})</span>`:'';
+  const pv = d.plan_variants_here||[];
+  const showVar = pv.length>1 || (pv.length===1 && pv[0].sw && pv[0].sw!==d.variant);
+  const varLine = showVar?`<div class="cnt">Variants marked on this sheet / Variantes marcadas en esta hoja: ${pv.map(v=>esc(v.sw||'(no SW note)')+' ×'+v.n).join(' · ')}</div>`:'';
+  return `<div class="conn"><div class="chip" style="background:${col}"></div><div class="body">
+    <div class="id">BLOCK ${esc(d.label)} ${vtxt}</div>
+    <div class="nm">${esc(d.name_en)}<br><span class="es">${esc(d.name_es)}</span></div>
+    <div class="ref">${d.ref?'Detail '+esc(d.ref)+' · ':''}PDF page${d.pages&&d.pages.length>1?'s':''} ${(d.pages||[]).join(', ')}</div>
+    ${countHere!=null?`<div class="cnt"><b>×${countHere}</b> marked in this section / marcadas en esta sección</div>`:''}${varLine}
+    <div class="secs">${secs.length?secs.map(id=>`<span class="pill ${id===secId?'on':''}" onclick="go('#swsec--${id}')"><span class="dot" style="background:${rgb(SEC_SW[id].color)}"></span>${esc(SEC_SW[id].label)} ×${d.sections[id]}</span>`).join(''):'<span class="pill">Not called out on the section sheets / Sin marca en las hojas de sección</span>'}</div>
+    <button class="btn go" onclick="go('#swdet--${encId(d.id)}--${secId||'swall'}')">Full detail & specs → · Detalle completo</button>
+  </div></div>`;
+}
+function renderSWSection(app, s, qs){ setBB('home');
+  const items=(s.conns||[]).map(c=>Object.assign({}, DET_SW[c.id], {plan_variants_here:c.variants})).sort((a,b)=>cmpId(a.id,b.id));
+  app.innerHTML = header({label:'Plan',fn:"go('#home')"}, `Shearwall section ${esc(s.label)}`, `${esc(s.bldg)} · PDF page ${s.page}`, rgb(s.color)) + `
+  <div class="wrap">
+    <div class="card"><h2>Section sheet <small>Hoja de la sección – pinch to zoom / pellizca para acercar</small></h2>
+      <div class="viewer" id="v-sec"></div></div>
+    <div class="card"><h2>Blocks in this section <small>Cuadros en esta sección – ${items.length} types / tipos</small></h2>
+      <div id="list">${items.map(d=>swBlockCard(d, s.id, (s.counts||{})[d.id])).join('')}</div>
+    </div>
+  </div>`;
+  makeViewer(document.getElementById('v-sec'), s.img, {taps: s.taps});
+}
+function renderSWDetail(app, d, qs){ setBB('home');
+  const from=qs.from||'swall'; const back= SEC_SW[from]?{label:'Section '+SEC_SW[from].label, fn:`go('#swsec--${from}')`}:{label:'List', fn:"go('#swall')"};
+  const i=DET_SW_ORDER.indexOf(d.id); const prev=i>0?DET_SW_ORDER[i-1]:null, next=i<DET_SW_ORDER.length-1?DET_SW_ORDER[i+1]:null;
+  const col=d.color?rgb(d.color):'#999';
+  const secs=Object.keys(d.sections||{}).sort((a,b)=>SWDATA.sw_sections.findIndex(s=>s.id===a)-SWDATA.sw_sections.findIndex(s=>s.id===b));
+  app.innerHTML = header(back, `BLOCK ${esc(d.label)}${d.variant?' ('+esc(d.variant)+')':''}`, esc(d.name_en), col) + `
+  <div class="wrap">
+    <div class="card"><div class="detail-head"><div class="chip" style="background:${col}"></div><div>
+      <div class="id">BLOCK ${esc(d.label)} ${d.variant?`<span class="v">(${esc(d.variant)})</span>`:''}</div>
+      <div class="nm">${esc(d.name_en)}<br><span class="es">${esc(d.name_es)}</span></div>
+      <div class="ref">${d.ref?'Structural detail '+esc(d.ref)+' · ':''}PDF page${d.pages&&d.pages.length>1?'s':''} ${(d.pages||[]).join(', ')}</div>
+    </div></div></div>
+    <div class="card"><h2>Full detail sheet & specs <small>Hoja completa del detalle y especificaciones</small></h2>
+      ${d.pages&&d.pages.length>1?`<div class="tabs">${d.pages.map((p,k)=>`<button class="tab ${k===0?'on':''}" onclick="detTabSW(${k})">Sheet ${k+1} of ${d.pages.length} (page ${p})</button>`).join('')}</div>`:''}
+      <div class="viewer" id="v-det"></div>
+    </div>
+    <div class="card"><h2>Marked in sections <small>Marcada en las secciones</small></h2>
+      <div class="secs" style="display:flex;flex-wrap:wrap;gap:6px">${secs.length?secs.map(id=>`<span class="pill ${id===from?'on':''}" onclick="go('#swsec--${id}')"><span class="dot" style="background:${rgb(SEC_SW[id].color)}"></span>${esc(SEC_SW[id].label)} ×${d.sections[id]}</span>`).join(''):'<span class="empty">Not called out on the section sheets. / No marcada en las hojas de sección.</span>'}</div>
+    </div>
+    <div class="nav2">${prev?`<button class="btn sec" onclick="go('#swdet--${encId(prev)}--${from}')">◀ ${esc(DET_SW[prev].label)}</button>`:'<span style="flex:1"></span>'}${next?`<button class="btn sec" onclick="go('#swdet--${encId(next)}--${from}')">${esc(DET_SW[next].label)} ▶</button>`:'<span style="flex:1"></span>'}</div>
+  </div>`;
+  window._swDetImgs=d.imgs; detTabSW(0);
+}
+function detTabSW(k){ document.querySelectorAll('.tabs .tab').forEach((t,i)=>t.classList.toggle('on',i===k)); makeViewer(document.getElementById('v-det'), window._swDetImgs[k]); }
+function renderSWAll(app, qs){ setBB('home');
+  app.innerHTML = header({label:'Plan',fn:"go('#home')"}, 'Shearwall blocks removed', `Cuadros de shearwall removidos`, '#1e73be') + `
+  <div class="wrap"><div class="card">
+    ${DET_SW_ORDER.length ? `<div id="list">${DET_SW_ORDER.map(id=>swBlockCard(DET_SW[id], null, null)).join('')}</div>` :
+    `<div class="hint" style="font-size:15px;padding:20px 0">This section is ready — Jorge Lugo is still preparing the shearwall-block data. Check back soon.<br><span class="es">Esta sección ya está lista — Jorge Lugo todavía está preparando los datos de los cuadros de shearwall. Vuelve pronto.</span></div>`}
   </div></div>`;
 }
 render();
