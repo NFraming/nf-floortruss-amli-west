@@ -24,6 +24,9 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cu
 .hdr .logo{flex:0 0 auto;height:38px;width:38px;display:block}
 .hdr .back{flex:0 0 auto;display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.14);border-radius:10px;padding:10px 12px;font-weight:600;min-height:44px}
 .hdr .ttl{flex:1 1 auto;min-width:0}
+.hdr .updbar{display:flex;justify-content:flex-end;padding:4px 12px 0}
+.hdr .upd{border:1.5px solid #fff;border-radius:6px;padding:1px 8px;font-size:11px;line-height:1.35;font-weight:700;letter-spacing:.3px;white-space:nowrap;background:rgba(255,255,255,.12)}
+.hdr .upd i{font-style:normal;font-weight:400;margin-left:4px}
 .hdr .ttl .t1{font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr .ttl .t2{font-size:12.5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr .stripe{height:5px;width:100%}
@@ -212,8 +215,10 @@ function parseRoute(){ const h=(location.hash||'#home').slice(1); const parts=h.
   else if(view==='swsec'||view==='swdet'){ qs.level=SWDATA.sw_levels.some(l=>l.id===parts[1])?parts[1]:DEFAULT_SW_LEVEL; arg=parts[2]||null; if(view==='swdet'&&arg) arg=decId(arg); if(parts[3]) qs.from=parts[3]; }
   else { if(view==='det'&&arg) arg=decId(arg); if(parts[2]) qs.from=parts[2]; }
   return {view, arg, qs}; }
+/* UPDATE BADGE - edit ONLY this line on every release (number goes up by 1, date = release day). Also bump CACHE_VERSION in service-worker.js. */
+const NF_UPDATE = {n:1, date:'Nov 6, 2026'};
 function header(back, t1, t2, color){
-  return `<div class="hdr"><div class="row"><img class="logo" src="header-mark.png" alt="National Framing"${back?'':' style="margin-right:2px"'}>${back?`<button class="back" onclick="${esc(back.fn)}">◀ ${esc(back.label)}</button>`:''}<div class="ttl"><div class="t1">${t1}</div><div class="t2">${t2}</div></div></div><div class="stripe" style="background:${color||'#1e73be'}"></div></div>`;
+  return `<div class="hdr"><div class="updbar"><div class="upd" aria-label="Update ${NF_UPDATE.n}, ${NF_UPDATE.date}">UPDATE ${NF_UPDATE.n}<i>· ${NF_UPDATE.date}</i></div></div><div class="row"><img class="logo" src="header-mark.png" alt="National Framing"${back?'':' style="margin-right:2px"'}>${back?`<button class="back" onclick="${esc(back.fn)}">◀ ${esc(back.label)}</button>`:''}<div class="ttl"><div class="t1">${t1}</div><div class="t2">${t2}</div></div></div><div class="stripe" style="background:${color||'#1e73be'}"></div></div>`;
 }
 function setBB(which){ for(const k of ['home','secs','all']){ const b=document.getElementById('bb-'+k); if(b) b.classList.toggle('on',k===which);} }
 
