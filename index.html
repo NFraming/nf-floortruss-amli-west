@@ -117,7 +117,7 @@ const IMG_MODE = "files"; // "inline" | "files"
 function imgSrc(key){ return IMG[key]; }
 const SEC = Object.fromEntries(DATA.sections.map(s=>[s.id,s]));
 const DET = Object.fromEntries(DATA.details.map(d=>[d.id,d]));
-const DET_ORDER = DATA.details.map(d=>d.id);
+const DET_ORDER = DATA.details.map(d=>d.id).sort(cmpId); /* B3: one numeric order everywhere (list and prev/next) */
 /* ---------- Shearblocks — Shear Blocking Interference, 4th/5th/6th level, same pattern as Sections/Details ----------
    8 zones, same ids/colors/positions as the Floor Truss Connections full plan above (level-independent -
    same building footprint, same fullplan hotspot map reused for all 3 levels). Fase 6 (2026-11-04): the
@@ -169,8 +169,8 @@ function makeViewer(el, srcKey, opts){
     if(opts.taps && opts.taps.length){ ov.style.width=iw+'px'; ov.style.height=ih+'px'; ov.innerHTML='';
       opts.taps.forEach(t=>{ const b=document.createElement('button'); b.className='tap';
         b.style.left=(t.x0*100)+'%'; b.style.top=(t.y0*100)+'%'; b.style.width=((t.x1-t.x0)*100)+'%'; b.style.height=((t.y1-t.y0)*100)+'%';
-        b.addEventListener('pointerdown',e=>e.stopPropagation());
-        b.addEventListener('click',e=>{ e.stopPropagation(); go(t.href); });
+        b.dataset.href=t.href; /* B1 fix: do NOT stop pointerdown here - the viewer must see every touch so pinch/pan work when the finger starts on a label. A real tap is detected in up(). This click handler only serves keyboard activation. */
+        b.addEventListener('click',e=>{ e.stopPropagation(); if(Date.now()-(window._navAt||0)>700) go(t.href); });
         ov.appendChild(b); });
       el.appendChild(ov); }
     el.appendChild(ctl);
@@ -190,6 +190,7 @@ function makeViewer(el, srcKey, opts){
       zoomAt(d/pinch.d, mx-r.left, my-r.top); tx+=mx-pinch.mx; ty+=my-pinch.my; clamp(); apply(); pinch={d:d,mx:mx,my:my}; moved+=10; e.preventDefault(); } });
   function up(e){ if(ptrs.has(e.pointerId)){ ptrs.delete(e.pointerId); if(ptrs.size<2) pinch=null;
       if(ptrs.size===0 && moved<8 && downPt){ const now=Date.now(); const r=el.getBoundingClientRect();
+        if(e.type==='pointerup'){ const hit=document.elementsFromPoint(e.clientX,e.clientY).find(n=>n.classList&&n.classList.contains('tap')&&n.dataset&&n.dataset.href); if(hit){ window._navAt=Date.now(); lastTap=0; go(hit.dataset.href); return; } }
         if(now-lastTap<320){ if(scale>minS*1.05){ fit(); } else { zoomAt(3, e.clientX-r.left, e.clientY-r.top); } lastTap=0; } else lastTap=now; } } }
   el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up);
   el.addEventListener('wheel',e=>{ const r=el.getBoundingClientRect(); zoomAt(e.deltaY<0?1.2:1/1.2, e.clientX-r.left, e.clientY-r.top); e.preventDefault(); },{passive:false});
@@ -329,7 +330,7 @@ function renderAll(app, qs){ setBB('all');
   app.innerHTML = header({label:'Plan',fn:"go('#home')"}, 'All connections', `${DATA.details.length} detail sheets · Todas las conexiones`, '#1e73be') + `
   <div class="wrap"><div class="card">
     <input class="srch" id="srch" placeholder="Filter by number, e.g. 7B or 13 / Filtrar por número" oninput="filterList(this.value)">
-    <div id="list">${fams.map(f=>`<div class="fam">${esc(f.title)}</div>`+[...f.ids].sort(cmpId).map(id=>connCard(DET[id], null, null)).join('')).join('')}</div>
+    <div id="list">${DET_ORDER.map(id=>connCard(DET[id], null, null)).join('')}</div>
   </div></div>`;
 }
 

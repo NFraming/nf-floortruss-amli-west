@@ -1,7 +1,7 @@
 // AMLI West - Floor Truss Connections - service worker
 // Cache-first offline app shell + all section/detail images, so the app works with
 // zero network after the first successful load (iOS and Android alike).
-const CACHE_VERSION = 'nf-floortruss-v2-8';
+const CACHE_VERSION = 'nf-floortruss-v2-9';
 const PRECACHE_URLS = [
   "./",
   "./index.html",
