@@ -25,6 +25,11 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cu
 .hdr .back{flex:0 0 auto;display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.14);border-radius:10px;padding:10px 12px;font-weight:600;min-height:44px}
 .hdr .ttl{flex:1 1 auto;min-width:0}
 .hdr .updbar{display:flex;justify-content:flex-end;padding:4px 12px 0}
+.hdr .updbar{align-items:center;justify-content:space-between;gap:8px;padding:5px 12px 0}
+.hdr .modesw{display:flex;border:1.5px solid #fff;border-radius:9px;overflow:hidden;flex:0 1 auto}
+.hdr .modesw button{color:#fff;font-weight:700;font-size:12.5px;line-height:1;padding:0 11px;min-height:34px;background:transparent;white-space:nowrap}
+.hdr .modesw button+button{border-left:1.5px solid #fff}
+.hdr .modesw button.on{background:#fff;color:var(--nf)}
 .hdr .upd{border:1.5px solid #fff;border-radius:6px;padding:1px 8px;font-size:11px;line-height:1.35;font-weight:700;letter-spacing:.3px;white-space:nowrap;background:rgba(255,255,255,.12)}
 .hdr .upd i{font-style:normal;font-weight:400;margin-left:4px}
 .hdr .ttl .t1{font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -58,6 +63,12 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cu
 .viewer .tapwrap{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;pointer-events:none}
 .viewer .tapwrap .tap{position:absolute;pointer-events:auto;background:rgba(255,220,0,0);border:0;border-radius:6px;padding:0}
 .viewer .tapwrap .tap:active{background:rgba(255,196,0,.35)}
+.viewer.full{position:fixed;left:0;top:0;right:0;bottom:0;width:100vw;height:100vh;height:100dvh;min-height:0;z-index:60;border-radius:0;border:0}
+.viewer.full .ctl{bottom:calc(8px + env(safe-area-inset-bottom,0px));right:calc(8px + env(safe-area-inset-right,0px))}
+.viewer .xfull{display:none;position:absolute;top:calc(8px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));z-index:6;min-height:44px;padding:0 14px;border-radius:10px;background:rgba(22,58,95,.95);color:#fff;font-weight:700;font-size:14px;align-items:center;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.viewer.full .xfull{display:flex}
+body.nf-lock{overflow:hidden}
+body.nf-lock #nfhint{display:none !important}
 .viewer .ctl{position:absolute;right:8px;bottom:8px;display:flex;gap:6px;z-index:5}
 .viewer .ctl button{width:44px;height:44px;border-radius:10px;background:rgba(22,58,95,.92);color:#fff;font-size:20px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 .viewer .ctl button.wide{width:auto;padding:0 12px;font-size:13px}
@@ -173,11 +184,21 @@ function makeViewer(el, srcKey, opts){
        actually zoomed in past fit do we take exclusive control (none) for pinch/pan. This is what
        was behind the "zoom and scroll down" complaint: the viewer used to swallow every touch at
        fit scale and do nothing with it. */
-    el.style.touchAction = (scale<=minS*1.01) ? 'pan-y' : 'none'; }
+    el.style.touchAction = (el.classList.contains('full') || scale>minS*1.01) ? 'none' : 'pan-y'; }
   function clamp(){ const maxS=Math.max(minS*10,8); scale=Math.max(minS,Math.min(scale,maxS));
     const w=iw*scale,h=ih*scale; tx=(w<=cw)?(cw-w)/2:Math.min(0,Math.max(cw-w,tx)); ty=(h<=ch)?(ch-h)/2:Math.min(0,Math.max(ch-h,ty)); }
   function fit(){ cw=el.clientWidth; ch=Math.max(el.clientHeight-CTRL_RESERVE,120); minS=Math.min(cw/iw,ch/ih); scale=minS; clamp(); apply(); }
   function zoomAt(f,x,y){ const ns=Math.max(minS,Math.min(scale*f,Math.max(minS*10,8))); const r=ns/scale; tx=x-(x-tx)*r; ty=y-(y-ty)*r; scale=ns; clamp(); apply(); }
+  /* UPDATE 3: full-screen zoom. Keeps the magnification and the spot of the sheet at the centre; closing goes back to FIT in the box. */
+  function inlineH(){ return Math.round(Math.min(Math.max(el.clientWidth*ih/iw,260),window.innerHeight*0.80))+'px'; }
+  function setFull(on){ if(!iw || el.classList.contains('full')===on) return;
+    const cxi=(cw/2-tx)/scale, cyi=(ch/2-ty)/scale, old=scale;
+    el.classList.toggle('full',on); document.body.classList.toggle('nf-lock',on);
+    if(on){ el.style.height=''; } else { el.style.height = el.classList.contains('tall') ? '' : inlineH(); }
+    fit();
+    if(on){ scale=Math.max(minS,old); tx=cw/2-cxi*scale; ty=ch/2-cyi*scale; clamp(); apply(); }
+    else { el.scrollIntoView({block:'nearest'}); } }
+  function autoFull(){ if(scale>minS*1.05 && !el.classList.contains('full')) setFull(true); }
   img.onload=()=>{ iw=img.naturalWidth; ih=img.naturalHeight; el.innerHTML=''; el.appendChild(img);
     if(opts.taps && opts.taps.length){ ov.style.width=iw+'px'; ov.style.height=ih+'px'; ov.innerHTML='';
       opts.taps.forEach(t=>{ const b=document.createElement('button'); b.className='tap';
@@ -187,6 +208,8 @@ function makeViewer(el, srcKey, opts){
         ov.appendChild(b); });
       el.appendChild(ov); }
     el.appendChild(ctl);
+    const xb=document.createElement('button'); xb.className='xfull'; xb.innerHTML='✕ Close · Cerrar'; xb.setAttribute('aria-label','Close full screen / Cerrar pantalla completa');
+    xb.addEventListener('pointerdown',e=>e.stopPropagation()); xb.addEventListener('click',()=>setFull(false)); el.appendChild(xb);
     if(!el.classList.contains('tall')){ const cwid=el.clientWidth; el.style.height=Math.round(Math.min(Math.max(cwid*ih/iw,260),window.innerHeight*0.80))+'px'; }
     fit();
     if(opts.initial){ const z=opts.initial; scale=minS*z.scale; tx=-z.x*scale+cw/2; ty=-z.y*scale+ch/2; clamp(); apply(); } };
@@ -201,16 +224,17 @@ function makeViewer(el, srcKey, opts){
       tx+=dx; ty+=dy; moved+=Math.abs(dx)+Math.abs(dy); p.x=e.clientX; p.y=e.clientY; clamp(); apply(); e.preventDefault(); }
     else if(ptrs.size===2 && pinch){ p.x=e.clientX; p.y=e.clientY; const a=[...ptrs.values()]; const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y); const mx=(a[0].x+a[1].x)/2, my=(a[0].y+a[1].y)/2;
       zoomAt(d/pinch.d, mx-r.left, my-r.top); tx+=mx-pinch.mx; ty+=my-pinch.my; clamp(); apply(); pinch={d:d,mx:mx,my:my}; moved+=10; e.preventDefault(); } });
-  function up(e){ if(ptrs.has(e.pointerId)){ ptrs.delete(e.pointerId); if(ptrs.size<2) pinch=null;
+  function up(e){ if(ptrs.has(e.pointerId)){ ptrs.delete(e.pointerId); if(ptrs.size<2) pinch=null; if(ptrs.size===0) setTimeout(autoFull,0);
       if(ptrs.size===0 && moved<8 && downPt){ const now=Date.now(); const r=el.getBoundingClientRect();
         if(e.type==='pointerup'){ const hit=document.elementsFromPoint(e.clientX,e.clientY).find(n=>n.classList&&n.classList.contains('tap')&&n.dataset&&n.dataset.href); if(hit){ window._navAt=Date.now(); lastTap=0; go(hit.dataset.href); return; } }
-        if(now-lastTap<320){ if(scale>minS*1.05){ fit(); } else { zoomAt(3, e.clientX-r.left, e.clientY-r.top); } lastTap=0; } else lastTap=now; } } }
+        if(now-lastTap<320){ if(scale>minS*1.05){ fit(); } else { zoomAt(3, e.clientX-r.left, e.clientY-r.top); autoFull(); } lastTap=0; } else lastTap=now; } } }
   el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up);
-  el.addEventListener('wheel',e=>{ const r=el.getBoundingClientRect(); zoomAt(e.deltaY<0?1.2:1/1.2, e.clientX-r.left, e.clientY-r.top); e.preventDefault(); },{passive:false});
+  el.addEventListener('wheel',e=>{ const r=el.getBoundingClientRect(); zoomAt(e.deltaY<0?1.2:1/1.2, e.clientX-r.left, e.clientY-r.top); autoFull(); e.preventDefault(); },{passive:false});
   ctl.addEventListener('pointerdown',e=>e.stopPropagation());
   ctl.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const a=b.dataset.a;
-    if(a==='fit') fit(); else if(a==='plus') zoomAt(1.5,cw/2,ch/2); else if(a==='minus') zoomAt(1/1.5,cw/2,ch/2);
-    else if(a==='tall'){ const on=el.classList.toggle('tall'); if(on){ el.style.height=''; } else { el.style.height=Math.round(Math.min(Math.max(el.clientWidth*ih/iw,260),window.innerHeight*0.80))+'px'; } const prev=scale/minS; fit(); if(prev>1.05){ zoomAt(prev,cw/2,ch/2);} el.scrollIntoView({block:'start',behavior:'smooth'}); } });
+    if(a==='fit') fit(); else if(a==='plus'){ zoomAt(1.5,cw/2,ch/2); autoFull(); } else if(a==='minus') zoomAt(1/1.5,cw/2,ch/2);
+    else if(a==='tall'){ setFull(!el.classList.contains('full')); } });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape' && el.classList.contains('full')) setFull(false); });
   window.addEventListener('resize',()=>{ if(iw){ const prev=scale/minS; fit(); if(prev>1.05) zoomAt(prev,cw/2,ch/2);} });
   return {fit};
 }
@@ -226,14 +250,22 @@ function parseRoute(){ const h=(location.hash||'#home').slice(1); const parts=h.
   else { if(view==='det'&&arg) arg=decId(arg); if(parts[2]) qs.from=parts[2]; }
   return {view, arg, qs}; }
 /* UPDATE BADGE - edit ONLY this line on every release (number goes up by 1, date = release day). Also bump CACHE_VERSION in service-worker.js. */
-const NF_UPDATE = {n:2, date:'Nov 7, 2026'};
+const NF_UPDATE = {n:3, date:'Nov 7, 2026'};
+/* ---- Connections | Shearblocks switch in the top bar (UPDATE 3) ---- */
+const NF_LAST = {conn:null, sw:null};
+function nfMode(){ const v=(location.hash||'#home').slice(1).split('--')[0]; return /^sw/.test(v)?'sw':'conn'; }
+function modeSwitch(){ const m=nfMode();
+  return `<div class="modesw" role="group" aria-label="View / Vista"><button class="${m==='conn'?'on':''}" onclick="nfSwitch('conn')" aria-label="Connections / Conexiones">Connections</button><button class="${m==='sw'?'on':''}" onclick="nfSwitch('sw')" aria-label="Shearblocks / Bloqueo de corte">Shearblocks</button></div>`; }
+function nfSwitch(m){ const cur=nfMode();
+  if(m===cur){ go(m==='sw'?('#swall--'+(((location.hash||'').split('--')[1]&&SWDATA.sw_levels.some(l=>l.id===location.hash.split('--')[1]))?location.hash.split('--')[1]:DEFAULT_SW_LEVEL)):'#home'); return; }
+  go(NF_LAST[m] || (m==='sw'?('#swall--'+DEFAULT_SW_LEVEL):'#home')); }
 function header(back, t1, t2, color){
-  return `<div class="hdr"><div class="updbar"><div class="upd" aria-label="Update ${NF_UPDATE.n}, ${NF_UPDATE.date}">UPDATE ${NF_UPDATE.n}<i>· ${NF_UPDATE.date}</i></div></div><div class="row"><img class="logo" src="header-mark.png" alt="National Framing"${back?'':' style="margin-right:2px"'}>${back?`<button class="back" onclick="${esc(back.fn)}">◀ ${esc(back.label)}</button>`:''}<div class="ttl"><div class="t1">${t1}</div><div class="t2">${t2}</div></div></div><div class="stripe" style="background:${color||'#1e73be'}"></div></div>`;
+  return `<div class="hdr"><div class="updbar">${modeSwitch()}<div class="upd" aria-label="Update ${NF_UPDATE.n}, ${NF_UPDATE.date}">UPDATE ${NF_UPDATE.n}<i>· ${NF_UPDATE.date}</i></div></div><div class="row"><img class="logo" src="header-mark.png" alt="National Framing"${back?'':' style="margin-right:2px"'}>${back?`<button class="back" onclick="${esc(back.fn)}">◀ ${esc(back.label)}</button>`:''}<div class="ttl"><div class="t1">${t1}</div><div class="t2">${t2}</div></div></div><div class="stripe" style="background:${color||'#1e73be'}"></div></div>`;
 }
 function setBB(which){ for(const k of ['home','secs','all']){ const b=document.getElementById('bb-'+k); if(b) b.classList.toggle('on',k===which);} }
 
 /* ---------- views ---------- */
-function render(){ const r=parseRoute(); const app=document.getElementById('app');
+function render(){ document.body.classList.remove('nf-lock'); const r=parseRoute(); const app=document.getElementById('app'); NF_LAST[nfMode()]=location.hash||'#home';
   if(r.view==='sec' && SEC[r.arg]) renderSection(app, SEC[r.arg], r.qs);
   else if(r.view==='det' && DET[r.arg]) renderDetail(app, DET[r.arg], r.qs);
   else if(r.view==='all') renderAll(app, r.qs);
@@ -511,7 +543,7 @@ if ('serviceWorker' in navigator) {
   const msg = isIOS
     ? 'Tap Share, then "Add to Home Screen" so this works with no signal on site. / Toca Compartir y luego "Agregar a inicio" para que funcione sin señal en la obra.'
     : 'Tap ⋮ then "Install app" / "Add to Home screen" so this works with no signal on site. / Toca ⋮ y luego "Instalar app" para que funcione sin señal en la obra.';
-  const bar = document.createElement('div');
+  const bar = document.createElement('div'); bar.id = 'nfhint';
   bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:999;background:#102a47;color:#fff;padding:10px 42px 10px 14px;font-size:13px;line-height:1.35;box-shadow:0 -2px 10px rgba(0,0,0,.3)';
   bar.innerHTML = msg;
   const x = document.createElement('button');
