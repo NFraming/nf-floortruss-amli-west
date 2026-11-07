@@ -133,6 +133,26 @@ details.notes li .es{display:block;color:var(--muted);font-size:12.5px}
 .hbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;color:var(--ink);border:3px solid var(--nf2);border-radius:14px;padding:13px 12px;font-size:17px;font-weight:800;min-height:54px;cursor:pointer;margin:0 0 12px 0}
 .hbtn small{display:block;font-size:12.5px;font-weight:600;color:var(--muted)}
 .hbtn:active{filter:brightness(.95)}
+.ins .warn{background:#fff0f0;border:3px solid #c0392b;border-radius:14px;padding:12px;margin:0 0 12px 0}
+.ins .warn .big{display:block;font-size:18px;font-weight:800;color:#9b1c1c;line-height:1.15;margin-bottom:6px}
+.ins .warn p{margin:0 0 6px 0;color:var(--ink)}
+.ins .tabs{display:flex;gap:8px;margin:0 0 12px 0}
+.ins .tabs button{flex:1;min-height:48px;border:2px solid var(--nf2);border-radius:12px;background:#fff;font-weight:800;font-size:16px;color:var(--ink)}
+.ins .tabs button.on{background:var(--nf)}
+.ins .dev{display:none}.ins .dev.on{display:block}
+.ins .mock{background:#f2f2f7;border:1px solid #c7c7cc;border-radius:12px;padding:10px;margin-top:8px;color:#222}
+.ins .mbar{display:flex;justify-content:space-around;align-items:center;background:#fff;border-radius:10px;padding:8px 2px;font-size:20px;color:#0a7aff}
+.ins .mbar span{display:flex;align-items:center;justify-content:center;min-width:44px;min-height:40px;border-radius:10px}
+.ins .mrow{background:#fff;border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;margin:4px 0;font-size:15px;color:#222}
+.ins .mrow svg{flex:0 0 auto}
+.ins .mhead{display:flex;justify-content:space-between;align-items:center;font-size:15px;padding:2px 4px 8px 4px;color:#0a7aff}
+.ins .mhead b{color:#111}
+.ins .hl{outline:4px solid #e11d1d;outline-offset:1px;position:relative}
+.ins .tap{display:inline-block;background:#e11d1d;color:#fff;font-size:11px;font-weight:800;border-radius:6px;padding:2px 6px;margin-left:6px;white-space:nowrap}
+.ins .icoapp{width:64px;height:64px;border-radius:15px;background:var(--nf);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;line-height:1.05;text-align:center;color:var(--ink)}
+.ins .note{font-size:13.5px;color:var(--muted);margin-top:6px}
+.inb{display:flex;gap:10px;align-items:center;width:100%;background:#fff0f0;border:3px solid #c0392b;border-radius:14px;padding:11px 12px;margin:0 0 12px 0;font-size:16px;font-weight:800;color:#9b1c1c;text-align:left;cursor:pointer}
+.inb small{display:block;font-size:12.5px;font-weight:600;color:var(--ink)}
 .how .st{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin:0 0 12px 0}
 .how .st .hd{display:flex;gap:10px;align-items:center;margin-bottom:6px}
 .how .st .num{flex:0 0 38px;height:38px;border-radius:50%;background:var(--nf);color:var(--ink);border:2px solid var(--ink);font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center}
@@ -269,7 +289,7 @@ function parseRoute(){ const h=(location.hash||'#home').slice(1); const parts=h.
   else { if(view==='det'&&arg) arg=decId(arg); if(parts[2]) qs.from=parts[2]; }
   return {view, arg, qs}; }
 /* UPDATE BADGE - edit ONLY this line on every release (number goes up by 1, date = release day). Also bump CACHE_VERSION in service-worker.js. */
-const NF_UPDATE = {n:5, date:'Nov 7, 2026'};
+const NF_UPDATE = {n:6, date:'Nov 7, 2026'};
 /* ---- Connections | Shearblocks switch in the top bar (UPDATE 3) ---- */
 const NF_LAST = {conn:null, sw:null};
 function nfMode(){ const v=(location.hash||'#home').slice(1).split('--')[0]; return /^sw/.test(v)?'sw':'conn'; }
@@ -284,10 +304,11 @@ function header(back, t1, t2, color){
 function setBB(which){ for(const k of ['home','secs','all']){ const b=document.getElementById('bb-'+k); if(b) b.classList.toggle('on',k===which);} }
 
 /* ---------- views ---------- */
-function render(){ document.body.classList.remove('nf-lock'); const r=parseRoute(); const app=document.getElementById('app'); NF_LAST[nfMode()]=location.hash||'#home';
+function render(){ document.body.classList.remove('nf-lock'); { const hb=document.getElementById('nfhint'); if(hb) hb.style.display=(parseRoute().view==='install')?'none':''; } const r=parseRoute(); const app=document.getElementById('app'); NF_LAST[nfMode()]=location.hash||'#home';
   if(r.view==='sec' && SEC[r.arg]) renderSection(app, SEC[r.arg], r.qs);
   else if(r.view==='det' && DET[r.arg]) renderDetail(app, DET[r.arg], r.qs);
   else if(r.view==='how') renderHow(app);
+  else if(r.view==='install') renderInstall(app);
   else if(r.view==='all') renderAll(app, r.qs);
   else if(r.view==='swsec' && SEC_SW[r.arg]) renderSWSection(app, SEC_SW[r.arg], r.qs.level, r.qs);
   else if(r.view==='swdet' && DET_SW[r.arg]) renderSWDetail(app, DET_SW[r.arg], r.qs.level, r.qs);
@@ -301,17 +322,22 @@ let nfDeferred=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();nfDeferred=e;});
 window.addEventListener('appinstalled',()=>{nfDeferred=null;const c=document.getElementById('instcard');if(c)c.style.display='none';});
 function nfStandalone(){return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;}
+function nfIsIOS(){const u=navigator.userAgent||''; return /iPhone|iPad|iPod/i.test(u)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
+/* iPhone: Telegram and most apps open links in a built-in browser that has no "Add to Home Screen". It has no "Safari/" in its user agent. */
+function nfIosInApp(){const u=navigator.userAgent||''; if(!nfIsIOS()) return false;
+  if(/CriOS|FxiOS|EdgiOS|OPiOS/.test(u)) return false;
+  if(/Telegram|FBAN|FBAV|Instagram|Line\/|MicroMessenger|GSA\//i.test(u)) return true;
+  return !/Safari\//.test(u);}
 function nfEnv(){const u=navigator.userAgent||'';
+  if(nfIsIOS()) return nfIosInApp()?'inapp':'ios';
   if(/Telegram|FBAN|FBAV|Instagram|Line\/|; wv\)/i.test(u)) return 'inapp';
-  if(/iPhone|iPad|iPod/i.test(u)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)) return 'ios';
   if(/Android/i.test(u)) return 'android';
   return 'other';}
 function nfShow(id){['g-ios','g-inapp','g-android','g-other'].forEach(k=>{const e=document.getElementById(k);if(e)e.classList.toggle('on',k===id);});}
 async function nfInstall(){
   const env=nfEnv();
-  if(env==='inapp'){nfShow('g-inapp');return;}
+  if(env==='inapp'||env==='ios'){go('#install');return;}
   if(nfDeferred){nfDeferred.prompt();try{await nfDeferred.userChoice;}catch(e){} nfDeferred=null;return;}
-  if(env==='ios'){nfShow('g-ios');return;}
   if(env==='android'){nfShow('g-android');return;}
   nfShow('g-other');}
 function nfCopyLink(btn){const url=location.href.split('#')[0];
@@ -321,6 +347,7 @@ function nfCopyLink(btn){const url=location.href.split('#')[0];
 function installCard(){ if(nfStandalone()) return '';
   return `<div class="card inst" id="instcard"><button class="ibtn" onclick="nfInstall()"><span style="font-size:26px">⬇</span><span>DOWNLOAD APP<small>DESCARGAR APP al teléfono</small></span></button>
     <div class="sv">Saves everything on your phone to use with no signal. / Guarda todo en tu teléfono para usarlo sin señal.</div>
+    <button class="btn sec" style="margin-top:8px" onclick="go('#install')">iPhone / Android – STEP BY STEP · PASO A PASO →</button>
     <div class="guide" id="g-ios"><ol>
       <li>Tap the Share button (square with arrow) at the bottom of Safari.<span>Toca el botón Compartir (cuadro con flecha) abajo en Safari.</span></li>
       <li>Scroll and tap “Add to Home Screen”.<span>Baja y toca “Agregar a pantalla de inicio”.</span></li>
@@ -352,12 +379,59 @@ function renderHow(app){ setBB('');
     <div style="height:12px"></div><button class="btn" onclick="go('#home')">◀ Home · Inicio</button>
   </div>`;
 }
+
+/* ---- iPhone / Android step-by-step install guide (UPDATE 6) ---- */
+const NF_SVG={
+  share:'<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#0a7aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M6 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1"/></svg>',
+  add:'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>',
+  compass:'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#0a7aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8l-2.5 5.5L8 16l2.5-5.5z"/></svg>',
+  copy:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>'
+};
+function installBanner(){ if(nfStandalone()) return ''; if(nfEnv()!=='inapp') return '';
+  return `<button class="inb" onclick="go('#install')"><span style="font-size:26px">⚠</span><span>Open in Safari to install<small>Abre en Safari para instalar – toca aquí / tap here</small></span></button>`; }
+function nfTab(id){document.querySelectorAll('.ins .dev').forEach(e=>e.classList.toggle('on',e.id===id));document.querySelectorAll('.ins .tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===id));}
+function renderInstall(app){ setBB('');
+  const env=nfEnv(); const inapp=env==='inapp'; const android=(env==='android'||(inapp&&!nfIsIOS()));
+  const st=(n,en,es,body)=>`<div class="st"><div class="hd"><div class="num">${n}</div><div class="t">${en}<small>${es}</small></div></div>${body}</div>`;
+  const tap='<span class="tap">TAP · TOCA</span>';
+  const warn=(inapp&&nfIsIOS())?`<div class="warn"><span class="big">STOP – you are inside Telegram (or another app).<br>ALTO – estás dentro de Telegram (u otra app).</span>
+      <p>The iPhone cannot install from here. Open this page in <b>Safari</b> first.<br><i>El iPhone no puede instalar desde aquí. Primero abre esta página en <b>Safari</b>.</i></p>
+      <div class="mock"><div class="mrow hl"><span>Open in Safari · Abrir en Safari</span>${NF_SVG.compass}</div></div>
+      <p style="margin-top:8px"><b>A.</b> Tap <b>⋯</b> (three dots, top right) or the compass icon at the bottom right. Then tap <b>Open in Safari</b>.<br><i>Toca <b>⋯</b> (tres puntos, arriba a la derecha) o el ícono de brújula abajo a la derecha. Luego toca <b>Abrir en Safari</b>.</i></p>
+      <p><b>B.</b> No such button? Tap Copy link, open the <b>Safari</b> app, paste in the address bar, tap Go.<br><i>¿No hay botón? Toca Copiar link, abre la app <b>Safari</b>, pega en la barra de direcciones y toca Ir.</i></p>
+      <button class="btn" onclick="nfCopyLink(this)">${NF_SVG.copy} Copy link · Copiar link</button></div>`:
+    ((inapp&&android)?`<div class="warn"><span class="big">Open this page in Chrome.<br>Abre esta página en Chrome.</span><p>Tap <b>⋮</b> then <b>Open in Chrome</b>, or copy the link and paste it in Chrome.<br><i>Toca <b>⋮</b> y luego <b>Abrir en Chrome</b>, o copia el link y pégalo en Chrome.</i></p><button class="btn" onclick="nfCopyLink(this)">${NF_SVG.copy} Copy link · Copiar link</button></div>`:'');
+  const ios=`
+    ${st(1,'Open the link in Safari','Abre el link en Safari',`<p>The page must be open in <b>Safari</b> (blue compass app). Not inside Telegram, WhatsApp or email.</p><p><i>La página debe estar abierta en <b>Safari</b> (la app de la brújula azul). No dentro de Telegram, WhatsApp o correo.</i></p><div class="mock"><div class="mrow"><span>nframing.github.io</span>${NF_SVG.compass}</div></div>`)}
+    ${st(2,'Tap the Share button','Toca el botón Compartir',`<p>Square with an arrow pointing up, at the <b>bottom center</b> of Safari. ${tap}</p><p><i>Cuadro con flecha hacia arriba, <b>abajo al centro</b> de Safari.</i></p>
+      <div class="mock"><div class="mbar"><span>‹</span><span>›</span><span class="hl">${NF_SVG.share}</span><span>📖</span><span>⧉</span></div></div>
+      <div class="note">Newer iPhones: if you only see <b>⋯</b> (three dots) at the bottom right, tap it first, then tap <b>Share</b>.<br><i>iPhones nuevos: si solo ves <b>⋯</b> (tres puntos) abajo a la derecha, tócalo primero y luego toca <b>Compartir</b>.</i></div>`)}
+    ${st(3,'Tap “Add to Home Screen”','Toca “Agregar a pantalla de inicio”',`<p>Swipe the list <b>up</b> until you see it. It has a square with a plus sign. ${tap}</p><p><i>Desliza la lista <b>hacia arriba</b> hasta verlo. Tiene un cuadro con signo más.</i></p>
+      <div class="mock"><div class="mrow"><span>Copy · Copiar</span>${NF_SVG.copy}</div><div class="mrow"><span>Add to Bookmarks · Agregar a marcadores</span><span>📖</span></div><div class="mrow hl"><span><b>Add to Home Screen</b> · Agregar a inicio</span>${NF_SVG.add}</div></div>`)}
+    ${st(4,'Tap “Add”','Toca “Agregar”',`<p>Top right corner. The name is “Floor Trusses”. If you see <b>Open as Web App</b>, leave it ON. ${tap}</p><p><i>Esquina de arriba a la derecha. El nombre es “Floor Trusses”. Si ves <b>Abrir como app web</b>, déjalo activado.</i></p>
+      <div class="mock"><div class="mhead"><span>Cancel · Cancelar</span><b>Add to Home Screen</b><span class="hl"><b style="color:#0a7aff">Add · Agregar</b></span></div><div class="mrow"><span>Floor Trusses</span><span class="icoapp" style="width:40px;height:40px;font-size:7px;border-radius:9px">NF</span></div></div>`)}
+    ${st(5,'Open it from your home screen','Ábrela desde tu pantalla de inicio',`<p>Find the yellow icon. Open it <b>once with signal</b> and wait for Home. After that it works in <b>airplane mode</b>.</p><p><i>Busca el ícono amarillo. Ábrela <b>una vez con señal</b> y espera a Home. Después funciona en <b>modo avión</b>.</i></p>
+      <div class="mock" style="display:flex;align-items:center;gap:12px"><div class="icoapp">NF<br>FLOOR<br>TRUSS</div><div style="font-size:14px">Floor Trusses<br><small>✈ works with no signal · funciona sin señal</small></div></div>`)}`;
+  const droid=`
+    ${st(1,'Open the link in Chrome','Abre el link en Chrome',`<p>Open the page in <b>Chrome</b>, not inside Telegram.</p><p><i>Abre la página en <b>Chrome</b>, no dentro de Telegram.</i></p>`)}
+    ${st(2,'Tap ⋮ (top right)','Toca ⋮ (arriba a la derecha)',`<p>Tap <b>Install app</b> or <b>Add to Home screen</b>. ${tap}</p><p><i>Toca <b>Instalar app</b> o <b>Agregar a pantalla principal</b>.</i></p><div class="mock"><div class="mrow hl"><span><b>Install app</b> · Instalar app</span>${NF_SVG.add}</div></div>`)}
+    ${st(3,'Tap “Install”','Toca “Instalar”',`<p>Open the yellow icon <b>once with signal</b>. After that it works in airplane mode.</p><p><i>Abre el ícono amarillo <b>una vez con señal</b>. Después funciona en modo avión.</i></p>`)}`;
+  app.innerHTML = header({label:'Home',fn:"go('#home')"}, 'Install the app', 'Instala la app', '#d99a00') + `<div class="wrap how ins">
+    ${nfStandalone()?`<div class="card"><h2>Already installed ✔ <small>Ya está instalada ✔</small></h2></div>`:''}
+    ${warn}
+    <div class="tabs"><button data-t="d-ios" class="${android?'':'on'}" onclick="nfTab('d-ios')">iPhone</button><button data-t="d-and" class="${android?'on':''}" onclick="nfTab('d-and')">Android</button></div>
+    <div class="dev ${android?'':'on'}" id="d-ios">${ios}</div>
+    <div class="dev ${android?'on':''}" id="d-and">${droid}</div>
+    <div style="height:8px"></div><button class="btn sec" onclick="nfCopyLink(this)">${NF_SVG.copy} Copy link · Copiar link</button>
+    <div style="height:10px"></div><button class="btn" onclick="go('#home')">◀ Home · Inicio</button>
+  </div>`;
+}
 function renderHome(app){ setBB('home'); const T=DATA.title; const fp=DATA.fullplan;
   let labels=DATA.sections.map(s=>`<button class="lbl" style="left:${s.cx}%;top:${s.cy}%;border-color:${rgb(s.color)}" onclick="event.stopPropagation();go('#sec--${s.id}')">${esc(s.label)}</button>`).join('');
   app.innerHTML = header(null, '4TH LEVEL – FLOOR TRUSS CONNECTIONS', T.job+' · '+T.company, '#d99a00') + `
   <div class="wrap">
     <div class="card title-card"><img src="header-logo.png" alt="National Framing Inc" style="height:46px;width:auto;border-radius:8px;margin-bottom:10px;display:block"><div class="big">4th Level – Floor Truss Connections</div><div class="sub">${esc(T.job)} · West Building · Buildings #3, #4 and #5</div><div class="meta">${esc(T.company)} · Rev 1 · ${esc(T.date)} · Created by ${esc(T.author)} · Phone version v1 (2026-11-02)</div></div>
-    ${installCard()}${howCard()}
+    ${installBanner()}${installCard()}${howCard()}
     <div class="card"><h2>Full plan – 4th level <small>Plano completo – nivel 4. Tap a section / Toca una sección.</small></h2>
       <div class="plan" id="plan" onclick="planTap(event)"><img id="planimg" src="${imgSrc('fullplan')}" alt="Full plan">${labels}</div>
       <div class="legend">${DATA.sections.map(s=>`<span class="pill" onclick="go('#sec--${s.id}')"><span class="dot" style="background:${rgb(s.color)}"></span>${esc(s.label)}</span>`).join('')}</div>
@@ -572,6 +646,7 @@ if ('serviceWorker' in navigator) {
 (function () {
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   if (isStandalone) return;
+  if ((typeof nfEnv === 'function' && nfEnv() === 'inapp') || location.hash === '#install') return;
   try { if (localStorage.getItem('nf-floortruss:install_hint_dismissed') === '1' || localStorage.getItem('nf_install_hint_dismissed') === '1') return; } catch (e) {}
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const msg = isIOS
