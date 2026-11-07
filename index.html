@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Floor Trusses">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#163a5f">
+<meta name="theme-color" content="#ffc400">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="apple-touch-icon" sizes="167x167" href="icon-167.png">
@@ -15,31 +15,31 @@
 <link rel="icon" sizes="192x192" href="icon-192.png">
 <title>4th Level – Floor Truss Connections · AMLI West · Phone version</title>
 <style>
-:root{--nf:#163a5f;--nf2:#1e73be;--bg:#f2f4f7;--card:#ffffff;--line:#d9dee5;--txt:#1b2430;--muted:#5b6675;--ok:#1f8a4c;--warn:#c9850a;}
+:root{--nf:#ffc400;--nf2:#d99a00;--nfd:#5a4300;--ink:#1b1b1b;--soft:#fff4c2;--bg:#f6f4ee;--card:#ffffff;--line:#d9dee5;--txt:#1b2430;--muted:#5b6675;--ok:#1f8a4c;--warn:#c9850a;}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.35;overscroll-behavior-y:contain}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer}
-.hdr{position:sticky;top:0;z-index:20;background:var(--nf);color:#fff;padding:env(safe-area-inset-top,0) 0 0 0;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.hdr{position:sticky;top:0;z-index:20;background:var(--nf);color:var(--ink);padding:env(safe-area-inset-top,0) 0 0 0;box-shadow:0 2px 6px rgba(0,0,0,.25)}
 .hdr .row{display:flex;align-items:center;gap:8px;padding:10px 12px;min-height:56px}
 .hdr .logo{flex:0 0 auto;height:38px;width:38px;display:block}
-.hdr .back{flex:0 0 auto;display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.14);border-radius:10px;padding:10px 12px;font-weight:600;min-height:44px}
+.hdr .back{flex:0 0 auto;display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.12);border-radius:10px;padding:10px 12px;font-weight:600;min-height:44px}
 .hdr .ttl{flex:1 1 auto;min-width:0}
 .hdr .updbar{display:flex;justify-content:flex-end;padding:4px 12px 0}
 .hdr .updbar{align-items:center;justify-content:space-between;gap:8px;padding:5px 12px 0}
-.hdr .modesw{display:flex;border:1.5px solid #fff;border-radius:9px;overflow:hidden;flex:0 1 auto}
-.hdr .modesw button{color:#fff;font-weight:700;font-size:12.5px;line-height:1;padding:0 11px;min-height:34px;background:transparent;white-space:nowrap}
-.hdr .modesw button+button{border-left:1.5px solid #fff}
-.hdr .modesw button.on{background:#fff;color:var(--nf)}
-.hdr .upd{border:1.5px solid #fff;border-radius:6px;padding:1px 8px;font-size:11px;line-height:1.35;font-weight:700;letter-spacing:.3px;white-space:nowrap;background:rgba(255,255,255,.12)}
+.hdr .modesw{display:flex;border:1.5px solid var(--ink);border-radius:9px;overflow:hidden;flex:0 1 auto}
+.hdr .modesw button{color:var(--ink);font-weight:700;font-size:12.5px;line-height:1;padding:0 11px;min-height:34px;background:transparent;white-space:nowrap}
+.hdr .modesw button+button{border-left:1.5px solid var(--ink)}
+.hdr .modesw button.on{background:var(--ink);color:#fff}
+.hdr .upd{border:1.5px solid var(--ink);border-radius:6px;padding:1px 8px;font-size:11px;line-height:1.35;font-weight:700;letter-spacing:.3px;white-space:nowrap;background:rgba(0,0,0,.07)}
 .hdr .upd i{font-style:normal;font-weight:400;margin-left:4px}
 .hdr .ttl .t1{font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr .ttl .t2{font-size:12.5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr .stripe{height:5px;width:100%}
 .wrap{padding:12px 12px 90px 12px;max-width:760px;margin:0 auto}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 12px 0}
-.card h2{font-size:15px;margin:0 0 8px 0;color:var(--nf);text-transform:uppercase;letter-spacing:.03em}
+.card h2{font-size:15px;margin:0 0 8px 0;color:var(--nfd);text-transform:uppercase;letter-spacing:.03em}
 .card h2 small{display:block;font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted);font-size:12.5px}
-.title-card{background:var(--nf);color:#fff;border:0}
+.title-card{background:var(--nf);color:var(--ink);border:0}
 .title-card .big{font-size:20px;font-weight:800;line-height:1.2}
 .title-card .sub{font-size:13.5px;opacity:.92;margin-top:6px}
 .title-card .meta{font-size:12px;opacity:.8;margin-top:8px}
@@ -49,12 +49,12 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cu
 .hint{font-size:12.5px;color:var(--muted);margin:8px 2px 0 2px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .sbtn{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;min-height:64px;text-align:left;box-shadow:0 1px 2px rgba(0,0,0,.05)}
-.sbtn:active{background:#eef3f9}
+.sbtn:active{background:var(--soft)}
 .sbtn .sw{flex:0 0 auto;width:18px;height:40px;border-radius:5px}
 .sbtn .n{font-weight:800;font-size:17px}
 .sbtn .b{font-size:12px;color:var(--muted)}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--nf2);color:#fff;border-radius:12px;padding:13px 14px;font-weight:700;min-height:48px;width:100%;text-align:center}
-.btn.sec{background:#fff;color:var(--nf);border:2px solid var(--nf2)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--nf);color:var(--ink);border:2px solid var(--nf2);border-radius:12px;padding:13px 14px;font-weight:700;min-height:48px;width:100%;text-align:center}
+.btn.sec{background:#fff;color:var(--nfd);border:2px solid var(--nf2)}
 .btn.small{min-height:40px;padding:8px 12px;font-size:14px;width:auto}
 .btn:active{filter:brightness(.92)}
 .viewer{position:relative;width:100%;height:58vh;min-height:300px;background:#dfe3e8;border:1px solid var(--line);border-radius:12px;overflow:hidden;touch-action:none;user-select:none}
@@ -65,17 +65,17 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cu
 .viewer .tapwrap .tap:active{background:rgba(255,196,0,.35)}
 .viewer.full{position:fixed;left:0;top:0;right:0;bottom:0;width:100vw;height:100vh;height:100dvh;min-height:0;z-index:60;border-radius:0;border:0}
 .viewer.full .ctl{bottom:calc(8px + env(safe-area-inset-bottom,0px));right:calc(8px + env(safe-area-inset-right,0px))}
-.viewer .xfull{display:none;position:absolute;top:calc(8px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));z-index:6;min-height:44px;padding:0 14px;border-radius:10px;background:rgba(22,58,95,.95);color:#fff;font-weight:700;font-size:14px;align-items:center;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.viewer .xfull{display:none;position:absolute;top:calc(8px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));z-index:6;min-height:44px;padding:0 14px;border-radius:10px;background:var(--nf);color:var(--ink);border:2px solid var(--ink);font-weight:800;font-size:14px;align-items:center;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 .viewer.full .xfull{display:flex}
 body.nf-lock{overflow:hidden}
 body.nf-lock #nfhint{display:none !important}
 .viewer .ctl{position:absolute;right:8px;bottom:8px;display:flex;gap:6px;z-index:5}
-.viewer .ctl button{width:44px;height:44px;border-radius:10px;background:rgba(22,58,95,.92);color:#fff;font-size:20px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.viewer .ctl button{width:44px;height:44px;border-radius:10px;background:var(--nf);color:var(--ink);border:2px solid var(--ink);font-size:20px;font-weight:800;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 .viewer .ctl button.wide{width:auto;padding:0 12px;font-size:13px}
 .viewer .loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#444;font-weight:600;background:#e9ecf0}
 .tabs{display:flex;gap:6px;margin:0 0 8px 0;flex-wrap:wrap}
-.tab{flex:1 1 auto;min-height:40px;border-radius:10px;border:2px solid var(--nf2);color:var(--nf);font-weight:700;padding:6px 10px;background:#fff}
-.tab.on{background:var(--nf2);color:#fff}
+.tab{flex:1 1 auto;min-height:40px;border-radius:10px;border:2px solid var(--nf2);color:var(--nfd);font-weight:700;padding:6px 10px;background:#fff}
+.tab.on{background:var(--nf);color:var(--ink)}
 .srch{width:100%;min-height:44px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:inherit;margin:0 0 10px 0}
 .conn{display:flex;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;margin:0 0 10px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
 .conn .chip{flex:0 0 auto;width:14px;border-radius:5px;border:1px solid rgba(0,0,0,.25)}
@@ -88,7 +88,7 @@ body.nf-lock #nfhint{display:none !important}
 .conn .cnt{font-size:12.5px;color:var(--muted);margin-top:4px}
 .conn .secs{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
 .pill{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:12.5px;font-weight:600;background:#f7f8fa;color:#223;min-height:28px}
-.pill.on{background:var(--nf);color:#fff;border-color:var(--nf)}
+.pill.on{background:var(--nf);color:var(--ink);border-color:var(--nf2)}
 .pill .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
 .conn .go{margin-top:8px}
 .detail-head{display:flex;gap:10px;align-items:flex-start}
@@ -100,31 +100,50 @@ body.nf-lock #nfhint{display:none !important}
 .detail-head .ref{font-size:12.5px;color:var(--muted);margin-top:2px}
 .nav2{display:flex;gap:10px;margin-top:4px}
 .nav2 .btn{flex:1 1 0}
-.fam{font-size:13px;font-weight:800;color:var(--nf);margin:14px 2px 6px 2px;text-transform:uppercase;letter-spacing:.03em}
+.fam{font-size:13px;font-weight:800;color:var(--nfd);margin:14px 2px 6px 2px;text-transform:uppercase;letter-spacing:.03em}
 .fam:first-child{margin-top:0}
 .row2{display:flex;gap:10px;align-items:center}
-details.notes summary{font-weight:700;color:var(--nf);cursor:pointer;min-height:40px;display:flex;align-items:center}
+details.notes summary{font-weight:700;color:var(--nfd);cursor:pointer;min-height:40px;display:flex;align-items:center}
 details.notes ol{padding-left:20px;margin:6px 0 0 0}
 details.notes li{margin:0 0 8px 0;font-size:13.5px}
 details.notes li .es{display:block;color:var(--muted);font-size:12.5px}
 .foot{font-size:11.5px;color:var(--muted);text-align:center;margin:12px 0 0 0}
 .bottombar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:#fff;border-top:1px solid var(--line);display:flex;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0)) 8px;gap:6px}
-.bottombar button{flex:1 1 0;min-height:48px;border-radius:10px;font-weight:700;font-size:13px;color:var(--nf);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
-.bottombar button.on{background:#e6eef8}
-.bottombar button span{font-size:11px;font-weight:500;color:var(--muted)}
+.bottombar button{flex:1 1 0;min-height:48px;border-radius:10px;font-weight:700;font-size:13px;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.bottombar button.on{background:var(--nf)}
+.bottombar button span{font-size:11px;font-weight:500;color:#4a4a4a}
 .empty{color:var(--muted);font-size:14px;padding:8px 2px}
 .legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 @media (min-width:640px){.grid{grid-template-columns:1fr 1fr 1fr 1fr}}
 
 .inst .btn{font-size:18px;min-height:56px;letter-spacing:.02em}
 .inst .btn small{display:block;font-weight:500;font-size:12.5px;opacity:.95}
-.inst .guide{display:none;margin-top:10px;border:1.5px solid var(--nf2);border-radius:12px;background:#eef5fc;padding:10px 12px}
+.inst .guide{display:none;margin-top:10px;border:1.5px solid var(--nf2);border-radius:12px;background:var(--soft);padding:10px 12px}
 .inst .guide.on{display:block}
 .inst .guide ol{margin:0;padding-left:22px}
 .inst .guide li{margin:0 0 8px 0;font-weight:600;color:var(--txt)}
 .inst .guide li span{display:block;font-weight:400;color:var(--muted);font-size:13px}
 .inst .guide .btn.small{margin-top:4px}
 .inst .done{display:none;font-weight:700;color:var(--ok)}
+.inst{border:3px solid var(--nf2);border-radius:14px}
+.inst .ibtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--nf);color:var(--ink);border:0;border-radius:14px;padding:16px 12px;font-size:19px;font-weight:800;min-height:58px;cursor:pointer}
+.inst .ibtn small{display:block;font-size:13px;font-weight:700}
+.inst .ibtn:active{filter:brightness(.92)}
+.inst .sv{font-size:13px;color:var(--muted);text-align:center;margin:8px 2px 0 2px}
+.hbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;color:var(--ink);border:3px solid var(--nf2);border-radius:14px;padding:13px 12px;font-size:17px;font-weight:800;min-height:54px;cursor:pointer;margin:0 0 12px 0}
+.hbtn small{display:block;font-size:12.5px;font-weight:600;color:var(--muted)}
+.hbtn:active{filter:brightness(.95)}
+.how .st{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin:0 0 12px 0}
+.how .st .hd{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.how .st .num{flex:0 0 38px;height:38px;border-radius:50%;background:var(--nf);color:var(--ink);border:2px solid var(--ink);font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center}
+.how .st .t{font-weight:800;font-size:17px;color:var(--ink);line-height:1.15}
+.how .st .t small{display:block;font-weight:600;font-size:13px;color:var(--muted)}
+.how .st p{margin:6px 0;font-size:14.5px;line-height:1.4;color:var(--txt)}
+.how .st p i{color:var(--muted)}
+.how .st img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line);margin-top:8px}
+.how .air{background:var(--soft);border:2px dashed var(--nf2);border-radius:12px;padding:12px;text-align:center;font-weight:800;color:var(--ink);font-size:16px;margin-top:8px}
+.how .air span{display:block;font-size:34px;line-height:1.1}
+.how .air small{display:block;font-weight:600;font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -250,7 +269,7 @@ function parseRoute(){ const h=(location.hash||'#home').slice(1); const parts=h.
   else { if(view==='det'&&arg) arg=decId(arg); if(parts[2]) qs.from=parts[2]; }
   return {view, arg, qs}; }
 /* UPDATE BADGE - edit ONLY this line on every release (number goes up by 1, date = release day). Also bump CACHE_VERSION in service-worker.js. */
-const NF_UPDATE = {n:3, date:'Nov 7, 2026'};
+const NF_UPDATE = {n:4, date:'Nov 7, 2026'};
 /* ---- Connections | Shearblocks switch in the top bar (UPDATE 3) ---- */
 const NF_LAST = {conn:null, sw:null};
 function nfMode(){ const v=(location.hash||'#home').slice(1).split('--')[0]; return /^sw/.test(v)?'sw':'conn'; }
@@ -268,6 +287,7 @@ function setBB(which){ for(const k of ['home','secs','all']){ const b=document.g
 function render(){ document.body.classList.remove('nf-lock'); const r=parseRoute(); const app=document.getElementById('app'); NF_LAST[nfMode()]=location.hash||'#home';
   if(r.view==='sec' && SEC[r.arg]) renderSection(app, SEC[r.arg], r.qs);
   else if(r.view==='det' && DET[r.arg]) renderDetail(app, DET[r.arg], r.qs);
+  else if(r.view==='how') renderHow(app);
   else if(r.view==='all') renderAll(app, r.qs);
   else if(r.view==='swsec' && SEC_SW[r.arg]) renderSWSection(app, SEC_SW[r.arg], r.qs.level, r.qs);
   else if(r.view==='swdet' && DET_SW[r.arg]) renderSWDetail(app, DET_SW[r.arg], r.qs.level, r.qs);
@@ -299,8 +319,8 @@ function nfCopyLink(btn){const url=location.href.split('#')[0];
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(ok,()=>{prompt('Copy this link / Copia este link',url);});}
   else{prompt('Copy this link / Copia este link',url);}}
 function installCard(){ if(nfStandalone()) return '';
-  return `<div class="card inst" id="instcard"><h2>Install the app <small>Instalar la app en el teléfono – funciona sin señal</small></h2>
-    <button class="btn" onclick="nfInstall()">DOWNLOAD APP<small>DESCARGAR APP</small></button>
+  return `<div class="card inst" id="instcard"><button class="ibtn" onclick="nfInstall()"><span style="font-size:26px">⬇</span><span>DOWNLOAD APP<small>DESCARGAR APP al teléfono</small></span></button>
+    <div class="sv">Saves everything on your phone to use with no signal. / Guarda todo en tu teléfono para usarlo sin señal.</div>
     <div class="guide" id="g-ios"><ol>
       <li>Tap the Share button (square with arrow) at the bottom of Safari.<span>Toca el botón Compartir (cuadro con flecha) abajo en Safari.</span></li>
       <li>Scroll and tap “Add to Home Screen”.<span>Baja y toca “Agregar a pantalla de inicio”.</span></li>
@@ -318,12 +338,26 @@ function installCard(){ if(nfStandalone()) return '';
       <li>Open this link on your phone: Safari (iPhone) or Chrome (Android).<span>Abre este link en tu teléfono: Safari (iPhone) o Chrome (Android).</span></li>
       <li>Tap DOWNLOAD APP there.<span>Toca DESCARGAR APP allí.</span></li></ol></div>
   </div>`;}
+function howCard(){ return `<button class="hbtn" onclick="go('#how')"><span style="font-size:24px">❓</span><span>HOW IT WORKS<small>CÓMO FUNCIONA – 5 simple steps / 5 pasos</small></span></button>`; }
+function renderHow(app){ setBB('');
+  const st=(n,en,es,pen,pes,img)=>`<div class="st"><div class="hd"><div class="num">${n}</div><div class="t">${en}<small>${es}</small></div></div><p>${pen}</p><p><i>${pes}</i></p>${img?`<img src="img/${img}.webp" alt="${en}">`:''}</div>`;
+  app.innerHTML = header({label:'Home',fn:"go('#home')"}, 'How it works', 'Cómo funciona', '#d99a00') + `<div class="wrap how">
+    <div class="card"><h2>5 simple steps <small>5 pasos simples</small></h2><div class="hint" style="margin:0">Red boxes show where to tap. / Los recuadros rojos muestran dónde tocar.</div></div>
+    ${st(1,'Install the app','Instala la app','Open the link in <b>Safari</b> (iPhone) or <b>Chrome</b> (Android) – not inside Telegram. Tap <b>DOWNLOAD APP</b> and follow the steps. The yellow <b>NF FLOOR TRUSS</b> icon appears on your home screen.','Abre el enlace en <b>Safari</b> (iPhone) o <b>Chrome</b> (Android) – no dentro de Telegram. Toca <b>DESCARGAR APP</b> y sigue los pasos. El ícono amarillo <b>NF FLOOR TRUSS</b> aparece en tu pantalla de inicio.','how1')}
+    ${st(2,'Pick where to start','Elige por dónde empezar','Tap a section on the full plan, or use <b>Sections</b> or <b>All connections</b> at the bottom. The top bar switches between <b>Connections</b> and <b>Shearblocks</b>.','Toca una sección en el plano completo, o usa <b>Secciones</b> o <b>Todas las conexiones</b> abajo. La barra de arriba cambia entre <b>Conexiones</b> y <b>Shearblocks</b>.','how2')}
+    ${st(3,'Open a connection','Abre una conexión','Tap a connection to see its full sheet with the <b>connection number</b>, notes and specs.','Toca una conexión para ver su hoja completa con el <b>número de conexión</b>, notas y especificaciones.','how3')}
+    ${st(4,'Zoom and move','Acerca y mueve','<b>Pinch</b> to zoom, drag to move, double-tap to zoom in. The sheet opens on the <b>whole screen</b>. Tap <b>✕ Close</b> to go back. <b>FIT</b> shows the full sheet.','<b>Pellizca</b> para acercar, arrastra para mover, doble toque para acercar. La hoja se abre en <b>pantalla completa</b>. Toca <b>✕ Cerrar</b> para regresar. <b>FIT</b> muestra la hoja completa.','how4')}
+    ${st(5,'Use it with no signal','Úsala sin señal','Open the app once with signal and wait for Home. After that it works offline. Test: turn on airplane mode and open a sheet.','Abre la app una vez con señal y espera a que cargue Home. Después funciona sin internet. Prueba: activa modo avión y abre una hoja.','')}
+    <div class="air"><span>✈</span>Airplane mode ON – still works<small>Modo avión – sigue funcionando</small></div>
+    <div style="height:12px"></div><button class="btn" onclick="go('#home')">◀ Home · Inicio</button>
+  </div>`;
+}
 function renderHome(app){ setBB('home'); const T=DATA.title; const fp=DATA.fullplan;
   let labels=DATA.sections.map(s=>`<button class="lbl" style="left:${s.cx}%;top:${s.cy}%;border-color:${rgb(s.color)}" onclick="event.stopPropagation();go('#sec--${s.id}')">${esc(s.label)}</button>`).join('');
-  app.innerHTML = header(null, '4TH LEVEL – FLOOR TRUSS CONNECTIONS', T.job+' · '+T.company, '#1e73be') + `
+  app.innerHTML = header(null, '4TH LEVEL – FLOOR TRUSS CONNECTIONS', T.job+' · '+T.company, '#d99a00') + `
   <div class="wrap">
     <div class="card title-card"><img src="header-logo.png" alt="National Framing Inc" style="height:46px;width:auto;border-radius:8px;margin-bottom:10px;display:block"><div class="big">4th Level – Floor Truss Connections</div><div class="sub">${esc(T.job)} · West Building · Buildings #3, #4 and #5</div><div class="meta">${esc(T.company)} · Rev 1 · ${esc(T.date)} · Created by ${esc(T.author)} · Phone version v1 (2026-11-02)</div></div>
-    ${installCard()}
+    ${installCard()}${howCard()}
     <div class="card"><h2>Full plan – 4th level <small>Plano completo – nivel 4. Tap a section / Toca una sección.</small></h2>
       <div class="plan" id="plan" onclick="planTap(event)"><img id="planimg" src="${imgSrc('fullplan')}" alt="Full plan">${labels}</div>
       <div class="legend">${DATA.sections.map(s=>`<span class="pill" onclick="go('#sec--${s.id}')"><span class="dot" style="background:${rgb(s.color)}"></span>${esc(s.label)}</span>`).join('')}</div>
@@ -418,7 +452,7 @@ function detTab(k){ document.querySelectorAll('.tabs .tab').forEach((t,i)=>t.cla
 
 function renderAll(app, qs){ setBB('all');
   const fams=DATA.families;
-  app.innerHTML = header({label:'Plan',fn:"go('#home')"}, 'All connections', `${DATA.details.length} detail sheets · Todas las conexiones`, '#1e73be') + `
+  app.innerHTML = header({label:'Plan',fn:"go('#home')"}, 'All connections', `${DATA.details.length} detail sheets · Todas las conexiones`, '#d99a00') + `
   <div class="wrap"><div class="card">
     <input class="srch" id="srch" placeholder="Filter by number, e.g. 7B or 13 / Filtrar por número" oninput="filterList(this.value)">
     <div id="list">${DET_ORDER.map(id=>connCard(DET[id], null, null)).join('')}</div>
@@ -489,7 +523,7 @@ function renderSWAll(app, level, qs){ level = SWDATA.sw_levels.some(l=>l.id===le
   const LVL=SWDATA.sw_levels.find(l=>l.id===level);
   let labels=SWDATA.sw_sections.map(s=>`<button class="lbl" style="left:${s.cx}%;top:${s.cy}%;border-color:${rgb(s.color)}" onclick="event.stopPropagation();go('#swsec--${level}--${s.id}')">${esc(s.label)}</button>`).join('');
   let lvltabs=SWDATA.sw_levels.map(l=>`<button class="tab ${l.id===level?'on':''}" onclick="go('#swall--${l.id}')">${esc(l.short)}</button>`).join('');
-  app.innerHTML = header({label:'Plan',fn:"go('#home')"}, 'SHEARBLOCKS', `Shear blocking interference — ${esc(LVL.label)}`, '#1e73be') + `
+  app.innerHTML = header({label:'Plan',fn:"go('#home')"}, 'SHEARBLOCKS', `Shear blocking interference — ${esc(LVL.label)}`, '#d99a00') + `
   <div class="wrap">
     <div class="card"><h2>Level <small>Nivel — tap to switch / toca para cambiar</small></h2><div class="tabs">${lvltabs}</div></div>
     <div class="card"><h2>Overall plan — 8 sections <small>Plano completo – 8 secciones. Tap a section / Toca una sección.</small></h2>
@@ -544,12 +578,12 @@ if ('serviceWorker' in navigator) {
     ? 'Tap Share, then "Add to Home Screen" so this works with no signal on site. / Toca Compartir y luego "Agregar a inicio" para que funcione sin señal en la obra.'
     : 'Tap ⋮ then "Install app" / "Add to Home screen" so this works with no signal on site. / Toca ⋮ y luego "Instalar app" para que funcione sin señal en la obra.';
   const bar = document.createElement('div'); bar.id = 'nfhint';
-  bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:999;background:#102a47;color:#fff;padding:10px 42px 10px 14px;font-size:13px;line-height:1.35;box-shadow:0 -2px 10px rgba(0,0,0,.3)';
+  bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:999;background:#ffc400;color:#1b1b1b;border-top:3px solid #1b1b1b;padding:10px 42px 10px 14px;font-size:13px;line-height:1.35;box-shadow:0 -2px 10px rgba(0,0,0,.3)';
   bar.innerHTML = msg;
   const x = document.createElement('button');
   x.textContent = '✕';
   x.setAttribute('aria-label', 'Close');
-  x.style.cssText = 'position:absolute;top:6px;right:8px;background:rgba(255,255,255,.15);border-radius:8px;width:28px;height:28px;color:#fff;font-size:15px;line-height:1';
+  x.style.cssText = 'position:absolute;top:6px;right:8px;background:rgba(0,0,0,.15);border-radius:8px;width:28px;height:28px;color:#1b1b1b;font-size:15px;line-height:1';
   x.onclick = () => { bar.remove(); try { localStorage.setItem('nf_install_hint_dismissed', '1'); } catch (e) {} };
   bar.appendChild(x);
   window.addEventListener('DOMContentLoaded', () => document.body.appendChild(bar));
