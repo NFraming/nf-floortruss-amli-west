@@ -1,7 +1,8 @@
 // AMLI West - Floor Truss Connections - service worker
 // Cache-first offline app shell + all section/detail images, so the app works with
 // zero network after the first successful load (iOS and Android alike).
-const CACHE_VERSION = 'nf-floortruss-v2-13';
+const CACHE_VERSION = 'nf-floortruss-v2-14';
+const CACHE_PREFIX = 'nf-floortruss-';  // only caches with this prefix belong to this app
 const PRECACHE_URLS = [
   "./",
   "./index.html",
@@ -168,7 +169,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((names) => Promise.all(
-      names.filter((n) => n !== CACHE_VERSION).map((n) => caches.delete(n))
+      names.filter((n) => n.startsWith(CACHE_PREFIX) && n !== CACHE_VERSION).map((n) => caches.delete(n))
     )).then(() => self.clients.claim())
   );
 });
@@ -176,7 +177,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then((cached) => {
+    caches.open(CACHE_VERSION).then((own) => own.match(event.request)).then((cached) => {
       if (cached) return cached;
       return fetch(event.request).then((resp) => {
         if (resp && resp.status === 200 && resp.type === 'basic') {
@@ -186,7 +187,7 @@ self.addEventListener('fetch', (event) => {
         return resp;
       }).catch(() => {
         // Offline and not in cache: for a navigation request, fall back to the app shell.
-        if (event.request.mode === 'navigate') return caches.match('./index.html');
+        if (event.request.mode === 'navigate') return caches.open(CACHE_VERSION).then((own) => own.match('./index.html'));
       });
     })
   );
