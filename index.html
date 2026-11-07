@@ -104,6 +104,16 @@ details.notes li .es{display:block;color:var(--muted);font-size:12.5px}
 .empty{color:var(--muted);font-size:14px;padding:8px 2px}
 .legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 @media (min-width:640px){.grid{grid-template-columns:1fr 1fr 1fr 1fr}}
+
+.inst .btn{font-size:18px;min-height:56px;letter-spacing:.02em}
+.inst .btn small{display:block;font-weight:500;font-size:12.5px;opacity:.95}
+.inst .guide{display:none;margin-top:10px;border:1.5px solid var(--nf2);border-radius:12px;background:#eef5fc;padding:10px 12px}
+.inst .guide.on{display:block}
+.inst .guide ol{margin:0;padding-left:22px}
+.inst .guide li{margin:0 0 8px 0;font-weight:600;color:var(--txt)}
+.inst .guide li span{display:block;font-weight:400;color:var(--muted);font-size:13px}
+.inst .guide .btn.small{margin-top:4px}
+.inst .done{display:none;font-weight:700;color:var(--ok)}
 </style>
 </head>
 <body>
@@ -216,7 +226,7 @@ function parseRoute(){ const h=(location.hash||'#home').slice(1); const parts=h.
   else { if(view==='det'&&arg) arg=decId(arg); if(parts[2]) qs.from=parts[2]; }
   return {view, arg, qs}; }
 /* UPDATE BADGE - edit ONLY this line on every release (number goes up by 1, date = release day). Also bump CACHE_VERSION in service-worker.js. */
-const NF_UPDATE = {n:1, date:'Nov 6, 2026'};
+const NF_UPDATE = {n:2, date:'Nov 7, 2026'};
 function header(back, t1, t2, color){
   return `<div class="hdr"><div class="updbar"><div class="upd" aria-label="Update ${NF_UPDATE.n}, ${NF_UPDATE.date}">UPDATE ${NF_UPDATE.n}<i>· ${NF_UPDATE.date}</i></div></div><div class="row"><img class="logo" src="header-mark.png" alt="National Framing"${back?'':' style="margin-right:2px"'}>${back?`<button class="back" onclick="${esc(back.fn)}">◀ ${esc(back.label)}</button>`:''}<div class="ttl"><div class="t1">${t1}</div><div class="t2">${t2}</div></div></div><div class="stripe" style="background:${color||'#1e73be'}"></div></div>`;
 }
@@ -233,11 +243,55 @@ function render(){ const r=parseRoute(); const app=document.getElementById('app'
   else renderHome(app);
 }
 
+
+/* ---- install card (v2-11) ---- */
+let nfDeferred=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();nfDeferred=e;});
+window.addEventListener('appinstalled',()=>{nfDeferred=null;const c=document.getElementById('instcard');if(c)c.style.display='none';});
+function nfStandalone(){return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;}
+function nfEnv(){const u=navigator.userAgent||'';
+  if(/Telegram|FBAN|FBAV|Instagram|Line\/|; wv\)/i.test(u)) return 'inapp';
+  if(/iPhone|iPad|iPod/i.test(u)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)) return 'ios';
+  if(/Android/i.test(u)) return 'android';
+  return 'other';}
+function nfShow(id){['g-ios','g-inapp','g-android','g-other'].forEach(k=>{const e=document.getElementById(k);if(e)e.classList.toggle('on',k===id);});}
+async function nfInstall(){
+  const env=nfEnv();
+  if(env==='inapp'){nfShow('g-inapp');return;}
+  if(nfDeferred){nfDeferred.prompt();try{await nfDeferred.userChoice;}catch(e){} nfDeferred=null;return;}
+  if(env==='ios'){nfShow('g-ios');return;}
+  if(env==='android'){nfShow('g-android');return;}
+  nfShow('g-other');}
+function nfCopyLink(btn){const url=location.href.split('#')[0];
+  const ok=()=>{btn.innerHTML='Link copied ✔ · Link copiado ✔';};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(ok,()=>{prompt('Copy this link / Copia este link',url);});}
+  else{prompt('Copy this link / Copia este link',url);}}
+function installCard(){ if(nfStandalone()) return '';
+  return `<div class="card inst" id="instcard"><h2>Install the app <small>Instalar la app en el teléfono – funciona sin señal</small></h2>
+    <button class="btn" onclick="nfInstall()">DOWNLOAD APP<small>DESCARGAR APP</small></button>
+    <div class="guide" id="g-ios"><ol>
+      <li>Tap the Share button (square with arrow) at the bottom of Safari.<span>Toca el botón Compartir (cuadro con flecha) abajo en Safari.</span></li>
+      <li>Scroll and tap “Add to Home Screen”.<span>Baja y toca “Agregar a pantalla de inicio”.</span></li>
+      <li>Tap “Add”. Open the app once with signal. Then it works in airplane mode.<span>Toca “Agregar”. Abre la app una vez con señal. Después funciona en modo avión.</span></li></ol></div>
+    <div class="guide" id="g-inapp"><ol>
+      <li>Telegram cannot install apps. Tap the button to copy the link.<span>Telegram no puede instalar apps. Toca el botón para copiar el link.</span></li>
+      <li>Paste it in Safari (iPhone) or Chrome (Android).<span>Pégalo en Safari (iPhone) o Chrome (Android).</span></li>
+      <li>There, tap DOWNLOAD APP again.<span>Allí, toca DESCARGAR APP otra vez.</span></li></ol>
+      <button class="btn small" onclick="nfCopyLink(this)">Copy link · Copiar link</button></div>
+    <div class="guide" id="g-android"><ol>
+      <li>Tap the ⋮ menu of Chrome (top right).<span>Toca el menú ⋮ de Chrome (arriba a la derecha).</span></li>
+      <li>Tap “Install app” or “Add to Home screen”.<span>Toca “Instalar app” o “Agregar a pantalla principal”.</span></li>
+      <li>Tap “Install”. Open the app once with signal.<span>Toca “Instalar”. Abre la app una vez con señal.</span></li></ol></div>
+    <div class="guide" id="g-other"><ol>
+      <li>Open this link on your phone: Safari (iPhone) or Chrome (Android).<span>Abre este link en tu teléfono: Safari (iPhone) o Chrome (Android).</span></li>
+      <li>Tap DOWNLOAD APP there.<span>Toca DESCARGAR APP allí.</span></li></ol></div>
+  </div>`;}
 function renderHome(app){ setBB('home'); const T=DATA.title; const fp=DATA.fullplan;
   let labels=DATA.sections.map(s=>`<button class="lbl" style="left:${s.cx}%;top:${s.cy}%;border-color:${rgb(s.color)}" onclick="event.stopPropagation();go('#sec--${s.id}')">${esc(s.label)}</button>`).join('');
   app.innerHTML = header(null, '4TH LEVEL – FLOOR TRUSS CONNECTIONS', T.job+' · '+T.company, '#1e73be') + `
   <div class="wrap">
     <div class="card title-card"><img src="header-logo.png" alt="National Framing Inc" style="height:46px;width:auto;border-radius:8px;margin-bottom:10px;display:block"><div class="big">4th Level – Floor Truss Connections</div><div class="sub">${esc(T.job)} · West Building · Buildings #3, #4 and #5</div><div class="meta">${esc(T.company)} · Rev 1 · ${esc(T.date)} · Created by ${esc(T.author)} · Phone version v1 (2026-11-02)</div></div>
+    ${installCard()}
     <div class="card"><h2>Full plan – 4th level <small>Plano completo – nivel 4. Tap a section / Toca una sección.</small></h2>
       <div class="plan" id="plan" onclick="planTap(event)"><img id="planimg" src="${imgSrc('fullplan')}" alt="Full plan">${labels}</div>
       <div class="legend">${DATA.sections.map(s=>`<span class="pill" onclick="go('#sec--${s.id}')"><span class="dot" style="background:${rgb(s.color)}"></span>${esc(s.label)}</span>`).join('')}</div>
