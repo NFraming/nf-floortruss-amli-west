@@ -1,8 +1,9 @@
 // AMLI West - Floor Truss Connections - service worker
 // Cache-first offline app shell + all section/detail images, so the app works with
 // zero network after the first successful load (iOS and Android alike).
-const CACHE_VERSION = 'nf-floortruss-v2-15';
+const CACHE_VERSION = 'nf-floortruss-v2-16';
 const CACHE_PREFIX = 'nf-floortruss-';  // only caches with this prefix belong to this app
+const SEC_CACHE = 'nfft-trusses-sec';       // truss sections saved on demand (page script manages it)
 const PRECACHE_URLS = [
   "./",
   "./index.html",
@@ -156,7 +157,22 @@ const PRECACHE_URLS = [
   "img/sw6_4A.webp",
   "img/sw6_3C.webp",
   "img/sw6_3B.webp",
-  "img/sw6_3A.webp"
+  "img/sw6_3A.webp",
+  "trusses/data/trusses.json",
+  "trusses/layouts/L4-3A.webp",
+  "trusses/layouts/L4-3B.webp",
+  "trusses/layouts/L4-3C.webp",
+  "trusses/layouts/L4-4A.webp",
+  "trusses/layouts/L4-4B.webp",
+  "trusses/layouts/L4-4C.webp",
+  "trusses/layouts/L4-4D.webp",
+  "trusses/layouts/L4-B5.webp",
+  "trusses/layouts/L567-3A.webp",
+  "trusses/layouts/L567-3B.webp",
+  "trusses/layouts/L567-3C.webp",
+  "trusses/layouts/L567-4A.webp",
+  "trusses/layouts/L567-4B.webp",
+  "trusses/layouts/L567-4C.webp"
 ];
 
 self.addEventListener('install', (event) => {
@@ -177,10 +193,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.open(CACHE_VERSION).then((own) => own.match(event.request)).then((cached) => {
+    caches.open(CACHE_VERSION).then((own) => own.match(event.request)).then((cached) => cached || caches.open(SEC_CACHE).then((c) => c.match(event.request))).then((cached) => {
       if (cached) return cached;
       return fetch(event.request).then((resp) => {
-        if (resp && resp.status === 200 && resp.type === 'basic') {
+        if (resp && resp.status === 200 && resp.type === 'basic' && event.request.url.indexOf('/trusses/designs/') < 0) {
           const copy = resp.clone();
           caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, copy));
         }
