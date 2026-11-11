@@ -263,7 +263,7 @@ body[data-page="lvl"] [data-n="4"]::before{top:-6px;left:-24px}
 .lvi{font-size:48px;line-height:1;flex:0 0 58px;width:58px;min-width:58px;text-align:center;overflow:hidden}
 .lvrow .n{font-size:22px;line-height:1.15;font-weight:900}
 .lvrow .b{font-size:15px;color:#4b5563}
-#flsave h2{font-size:24px}
+#flsave h2,#trsave h2{font-size:24px}
 body[data-page="lvl"] [data-n="2"]::before{top:8px;left:auto;right:8px}
 body[data-page="lvl"] [data-n="3"]::before{top:-9px;left:-6px}
 .lvi .sbico{display:block;margin:0 auto}
@@ -409,7 +409,7 @@ function parseRoute(){ const h=(location.hash||'#start').slice(1); const parts=h
   else { if(view==='det'&&arg) arg=decId(arg); if(parts[2]) qs.from=parts[2]; }
   return {view, arg, qs}; }
 /* UPDATE BADGE - edit ONLY this line on every release (number goes up by 1, date = release day). Also bump CACHE_VERSION in service-worker.js. */
-const NF_UPDATE = {n:18, date:'Nov 11, 2026'};
+const NF_UPDATE = {n:19, date:'Nov 11, 2026'};
 /* ---- Connections | Shearblocks switch in the top bar (UPDATE 3) ---- */
 const NF_LAST = {conn:null, sw:null, tr:null};
 function nfMode(){ const v=(location.hash||'#home').slice(1).split('--')[0]; if(v===''||v==='home'||v==='start'||v==='lvl') return 'lv'; return /^sw/.test(v)?'sw':(/^tr/.test(v)?'tr':'conn'); }
@@ -916,28 +916,32 @@ function planTapTR(ev,g){ const img=document.getElementById('planimgTR'); const 
   if(idxCanvas){ done(idxCanvas); return; }
   const im=new Image(); im.onload=()=>{ const c=document.createElement('canvas'); c.width=im.naturalWidth; c.height=im.naturalHeight; c.getContext('2d').drawImage(im,0,0); idxCanvas=c; done(c); }; im.src=imgSrc('fullplan_index'); }
 /* ---------- Section menu (Karla's structure: layout / connections / shear blocks / repairs) ---------- */
-function trMenuRow(ico,en,es,sub,onclick,dis){ return `<button class="sbtn" style="width:100%;margin:0 0 10px 0${dis?';opacity:.6':''}" ${dis?'disabled':`onclick="${onclick}"`}><span style="font-size:26px;flex:0 0 auto">${ico}</span><span><span class="n" style="font-size:16px">${en}</span><br><span class="b">${es}</span><br><span class="b">${sub}</span></span></button>`; }
+function trMenuRow(ico,title,sub,onclick,dis){ return `<button class="sbtn lvrow${dis?' off':''}" ${dis?'disabled':`onclick="${onclick}"`}><span class="lvi">${ico}</span><span class="lvt"><span class="n">${title}</span><br><span class="b">${sub}</span></span></button>`; }
 function trSec(app,s){ trMore(app,s); }
 function trMore(app,s,bk){ const g=trGroup(s), cid=trDataId(s);
   const hasConn=(g==='4' && SEC[cid]);
   const swLv=(g==='4'?['4th']:['5th','6th']).filter(l=>SWDATA.sw_imgs && SWDATA.sw_imgs[l] && SWDATA.sw_imgs[l][cid]);
+  const RFIICO='<svg class="sbico" viewBox="0 0 100 100" width="52" height="52" aria-hidden="true"><line x1="66" y1="66" x2="92" y2="92" stroke="#111827" stroke-width="11" stroke-linecap="round"/><circle cx="42" cy="42" r="33" fill="#ffffff" stroke="#111827" stroke-width="7"/><text x="42" y="52" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="28" fill="#111827">RFI</text></svg>'; const SHEARICO='<svg class="sbico" viewBox="0 0 100 100" width="52" height="52" aria-hidden="true"><rect x="6" y="6" width="88" height="88" rx="2" fill="#ffffff" stroke="#1e1b6b" stroke-width="5"/><polygon points="19,19 73,19 19,77" fill="#fde9a6" stroke="#1e1b6b" stroke-width="4" stroke-linejoin="round"/><polygon points="81,27 77,81 27,81" fill="#fde9a6" stroke="#1e1b6b" stroke-width="4" stroke-linejoin="round"/></svg>';
   let rows='';
   rows+= trPend(s)
-   ? trMenuRow('⏳','Truss layout','Layout de trusses','Pending For Construction set — Allied has not issued it yet / Pendiente: Allied aún no lo emite','',true)
-   : trMenuRow('📐','Truss layout','Layout de trusses','Layout sheet with the trusses of this section / Hoja de layout con los trusses de esta sección',`go('#trlay--${s.id}')`);
+   ? trMenuRow('⏳','Truss layout','Pending','',true)
+   : trMenuRow('📐','Truss layout',s._marks.length+' trusses',`go('#trlay--${s.id}')`);
   rows+= hasConn
-   ? trMenuRow('🔩','Truss connections','Conexiones de trusses','Connections to walls, posts, etc. / Conexiones a paredes, postes, etc.',`go('#sec--${cid}')`)
-   : trMenuRow('🔩','Truss connections','Conexiones de trusses','Pending — only Level 4 is in the app today / Pendiente: hoy solo está el nivel 4','',true);
-  if(swLv.length){ rows+= trMenuRow('🧱','Shear blocks locations','Ubicación de shear blocks',swLv.map(l=>l+' level').join(' · '),swLv.length===1?`go('#swsec--${swLv[0]}--${cid}')`:`trPickSW('${cid}')`);
+   ? trMenuRow('🔩','Truss connections','Walls, posts, etc.',`go('#sec--${cid}')`)
+   : trMenuRow('🔩','Truss connections','Pending','',true);
+  if(swLv.length){ rows+= trMenuRow(SHEARICO,'Shear blocks locations',swLv.map(l=>l+' level').join(' · '),swLv.length===1?`go('#swsec--${swLv[0]}--${cid}')`:`trPickSW('${cid}')`);
     if(swLv.length>1) rows+=`<div class="tabs" id="swpick" style="display:none">${swLv.map(l=>`<button class="tab" onclick="go('#swsec--${l}--${cid}')">${l} level</button>`).join('')}</div>`; }
-  else rows+= trMenuRow('🧱','Shear blocks locations','Ubicación de shear blocks','Pending / Pendiente','',true);
-  rows+= trMenuRow('🛠','Repairs & RFI changes','Reparaciones y cambios por RFI','None posted yet for this section / Ninguno publicado para esta sección','',true);
+  else rows+= trMenuRow(SHEARICO,'Shear blocks locations','Pending','',true);
+  rows+= trMenuRow(RFIICO,'RFI\'s','None posted','',true);
+  rows+= trMenuRow('🛠','Repairs','None posted','',true);
   app.innerHTML=header(bk?{label:'Layout',fn:bk}:{label:'Plan',fn:`go('#trall--${g}--${NF_PLANLVL||(g==='4'?4:5)}')`},`${esc(trName(s))}`,`${esc(trSub(s))} · ${trLvlLbl(g)}`,trStripe())+`
   <div class="wrap">
     ${trPend(s)?`<div class="card" style="border:3px solid #c9850a;background:#fff4c2"><h2>⏳ Pending For Construction set <small>Pendiente set For Construction</small></h2><div>Allied has not issued the For Construction set for ${esc(trName(s))} at ${trGLabel(g)} (it is not in Submittal #277). It will be added when Allied issues it. / Allied aún no ha emitido el set For Construction de ${esc(trName(s))} en ${trGLabel(g)} (no está en el Submittal #277). Se agregará cuando lo emita.</div></div>`:''}
-    <div class="card"><h2>Drawings <small>Planos</small></h2>${rows}</div>
-    <div class="foot">Allied Truss · Submittal #277 · ${trLvlLbl(g)}</div>
-  </div>`; }
+    <div class="card"><h2>Files <small>Tap one</small></h2>${rows}</div>
+    ${trPend(s)?'':`<div class="card" id="trsave" data-alt="1"></div>`}
+    <div class="foot">${trLvlLbl(g)}</div>
+  </div>`;
+  if(!trPend(s)) trPaintSave(s.id); }
 function trPickSW(cid){ const e=document.getElementById('swpick'); if(e) e.style.display=(e.style.display==='none'?'flex':'none'); }
 /* ---------- Layout sheet with tappable truss marks ---------- */
 function trTaps(s,hl){ const W=s.layout_px[0], H=s.layout_px[1], mw=40/W, mh=40/H; const out=[];
@@ -997,7 +1001,7 @@ async function trPaintSave(id){ const s=TRSEC[id], box=document.getElementById('
   else if(TRBUSY[id]) body=`<div id="trprog" style="font-weight:800">Saving… ${TRBUSY[id].done} of ${tot}</div>`;
   else if(n>=tot) body=`<div style="font-weight:800;color:var(--ok)">✔ Saved on this phone</div><div class="hint">All ${tot} truss design pages of this section work with no signal.</div><button class="btn sec" style="margin-top:8px" onclick="trRemove('${id}')">Remove from phone</button>`;
   else body=`<button class="btn" onclick="trSave('${id}')"><span>⬇ Save this section offline · ${size}<br><small style="font-weight:600">${tot} pages${n>0?' · '+n+' already saved':''}</small></span></button><div class="hint">Do this once with Wi-Fi or good signal.</div>`;
-  box.innerHTML=`<h2>Offline</h2><div class="hint" style="margin:0 0 8px 0">The layout sheet and truss positions are always saved on the phone.</div>`+body; }
+  box.innerHTML=`<h2>Offline</h2><div class="hint" style="margin:0 0 8px 0">${box.dataset.alt?'Layouts, connections and shear blocks are always on the phone.':'The layout sheet and truss positions are always saved on the phone.'}</div>`+body; }
 async function trSave(id){ const s=TRSEC[id]; if(TRBUSY[id]) return; TRBUSY[id]={done:0,fail:0};
   try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{}); }catch(e){}
   const c=await caches.open(TR_CACHE); const have=new Set((await c.keys()).map(r=>r.url)); const todo=s._urls.filter(u=>!have.has(trAbs(u))); TRBUSY[id].done=s._urls.length-todo.length; trPaintSave(id);
