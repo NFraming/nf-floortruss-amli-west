@@ -409,7 +409,7 @@ function parseRoute(){ const h=(location.hash||'#start').slice(1); const parts=h
   else { if(view==='det'&&arg) arg=decId(arg); if(parts[2]) qs.from=parts[2]; }
   return {view, arg, qs}; }
 /* UPDATE BADGE - edit ONLY this line on every release (number goes up by 1, date = release day). Also bump CACHE_VERSION in service-worker.js. */
-const NF_UPDATE = {n:23, date:'Nov 12, 2026'};
+const NF_UPDATE = {n:24, date:'Nov 12, 2026'};
 /* ---- Connections | Shearblocks switch in the top bar (UPDATE 3) ---- */
 const NF_LAST = {conn:null, sw:null, tr:null};
 function nfMode(){ const v=(location.hash||'#home').slice(1).split('--')[0]; if(v===''||v==='home'||v==='start'||v==='lvl') return 'lv'; return /^sw/.test(v)?'sw':(/^tr/.test(v)?'tr':'conn'); }
@@ -732,12 +732,16 @@ function renderSection(app, s, qs){ setBB('secs');
     <div class="card"><h2>Section sheet <small>Hoja de la sección – pinch to zoom, drag to move, double-tap to zoom, tap a CONNECTION label to open its detail / pellizca para acercar, arrastra para mover, doble toque para acercar, toca una etiqueta CONNECTION para abrir su detalle</small></h2>
       <div class="viewer" id="v-sec"></div></div>
     <div class="card"><h2>Connections in this section <small>Conexiones en esta sección – ${items.length} types / tipos · ${s.ncallouts} callouts marked / marcas</small></h2>
-      <input class="srch" id="srch" placeholder="Filter by number, e.g. 12 or 5.B / Filtrar por número" oninput="filterList(this.value)">
-      <div id="list">${items.map(d=>connCard(d, s.id, s.counts[d.id])).join('')}</div>
+      <input class="srch" id="srch" placeholder="Number, e.g. 1.1 or 5.B / Número" oninput="secFind('${s.id}')" autocomplete="off" autocapitalize="characters">
+      <div id="list" style="display:flex;flex-wrap:wrap;gap:6px"></div>
     </div>
   </div>`;
+  window._secItems=items;
   makeViewer(document.getElementById('v-sec'), s.img, {taps: s.taps, noctl:true});
 }
+function secFind(sid){ const q=(document.getElementById('srch').value||'').trim().toUpperCase().replace('#',''), box=document.getElementById('list'), s=SEC[sid];
+  if(!q){ box.innerHTML=''; return; }
+  box.innerHTML=(window._secItems||[]).filter(d=>String(d.label).toUpperCase().indexOf(q)>=0).map(d=>`<span class="pill" onclick="go('#det--${encId(d.id)}--${sid}')"><span class="dot" style="background:${d.color?rgb(d.color):'#999'}"></span>${esc(d.label)}${d.variant?' ('+esc(d.variant)+')':''} ×${s.counts[d.id]}</span>`).join('')||'<span class="empty">No match</span>'; }
 function filterList(q){ q=q.trim().toUpperCase().replace('#',''); document.querySelectorAll('#list .conn').forEach(c=>{ const id=c.querySelector('.id').textContent.toUpperCase(); c.style.display=(!q||id.includes(q))?'':'none'; }); }
 
 function renderDetail(app, d, qs){ setBB('all');
