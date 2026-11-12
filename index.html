@@ -409,7 +409,7 @@ function parseRoute(){ const h=(location.hash||'#start').slice(1); const parts=h
   else { if(view==='det'&&arg) arg=decId(arg); if(parts[2]) qs.from=parts[2]; }
   return {view, arg, qs}; }
 /* UPDATE BADGE - edit ONLY this line on every release (number goes up by 1, date = release day). Also bump CACHE_VERSION in service-worker.js. */
-const NF_UPDATE = {n:20, date:'Nov 12, 2026'};
+const NF_UPDATE = {n:21, date:'Nov 12, 2026'};
 /* ---- Connections | Shearblocks switch in the top bar (UPDATE 3) ---- */
 const NF_LAST = {conn:null, sw:null, tr:null};
 function nfMode(){ const v=(location.hash||'#home').slice(1).split('--')[0]; if(v===''||v==='home'||v==='start'||v==='lvl') return 'lv'; return /^sw/.test(v)?'sw':(/^tr/.test(v)?'tr':'conn'); }
@@ -428,8 +428,8 @@ function render(){ document.body.classList.remove('nf-lock'); { const hb=documen
   { const bb=document.getElementById('bottombar'); if(bb && nfMode()!=='tr' && bb.dataset.m==='tr'){ bb.innerHTML=BB_ORIG; bb.dataset.m=''; } }
   { const bb=document.getElementById('bottombar'); if(bb) bb.style.display=(nfMode()==='lv'||nfMode()==='tr')?'none':''; }
   if(/^tr/.test(r.view)){ renderTR(app, r); return; }
-  if(r.view==='sec' && SEC[r.arg]) renderSection(app, SEC[r.arg], r.qs);
-  else if(r.view==='det' && DET[r.arg]) renderDetail(app, DET[r.arg], r.qs);
+  if(r.view==='sec' && SEC[r.arg]){ renderSection(app, SEC[r.arg], r.qs); nfP6(app); }
+  else if(r.view==='det' && DET[r.arg]){ renderDetail(app, DET[r.arg], r.qs); nfP6(app); }
   else if(r.view==='start') renderStart(app);
   else if(r.view==='how') renderHow(app);
   else if(r.view==='install') renderInstall(app);
@@ -736,7 +736,7 @@ function renderSection(app, s, qs){ setBB('secs');
       <div id="list">${items.map(d=>connCard(d, s.id, s.counts[d.id])).join('')}</div>
     </div>
   </div>`;
-  makeViewer(document.getElementById('v-sec'), s.img, {taps: s.taps});
+  makeViewer(document.getElementById('v-sec'), s.img, {taps: s.taps, noctl:true});
 }
 function filterList(q){ q=q.trim().toUpperCase().replace('#',''); document.querySelectorAll('#list .conn').forEach(c=>{ const id=c.querySelector('.id').textContent.toUpperCase(); c.style.display=(!q||id.includes(q))?'':'none'; }); }
 
@@ -765,7 +765,7 @@ function renderDetail(app, d, qs){ setBB('all');
   </div>`;
   window._detImgs=d.imgs; detTab(0);
 }
-function detTab(k){ document.querySelectorAll('.tabs .tab').forEach((t,i)=>t.classList.toggle('on',i===k)); makeViewer(document.getElementById('v-det'), window._detImgs[k]); }
+function detTab(k){ document.querySelectorAll('.tabs .tab').forEach((t,i)=>t.classList.toggle('on',i===k)); makeViewer(document.getElementById('v-det'), window._detImgs[k], {noctl:true}); }
 
 function renderAll(app, qs){ setBB('all');
   const fams=DATA.families;
@@ -877,6 +877,7 @@ function trPend(s){ return s.status!=='ready'; }
 function trStripe(){ return '#d99a00'; }
 function trLoading(app,back,t1,t2){ app.innerHTML=header(back,t1,t2,trStripe())+'<div class="wrap"><div class="card"><div class="empty">Loading truss data… / Cargando datos de trusses…</div></div></div>'; }
 function trFail(app,err){ app.innerHTML=header({label:'Home',fn:"go('#home')"},'Trusses','Could not load / No se pudo cargar',trStripe())+'<div class="wrap"><div class="card"><div class="empty"><b>Truss data did not load.</b> Open the app once with signal, then try again. / Los datos de trusses no cargaron. Abre la app una vez con señal y vuelve a intentar.<br><small>'+esc(err&&err.message||err)+'</small></div></div></div>'; }
+function nfP6(app){ trUpd(app); app.querySelectorAll('.nav2').forEach(e=>e.remove()); const bb=document.getElementById('bottombar'); if(bb) bb.style.display='none'; }
 function trUpd(app){ const hd=app.querySelector('.hdr'); if(hd){ const ub=hd.querySelector('.updbar'); if(ub) ub.remove(); }
   const w=app.querySelector('.wrap'); if(w && !document.getElementById('nfstat')) w.insertAdjacentHTML('afterbegin','<button class="nfstat c" id="nfstat" onclick="nfCheck()" aria-label="Update status">UPDATE '+NF_UPDATE.n+' · '+NF_UPDATE.date+'</button>'); nfCheck(); }
 function renderTR(app,r){
