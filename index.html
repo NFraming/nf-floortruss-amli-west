@@ -409,7 +409,7 @@ function parseRoute(){ const h=(location.hash||'#start').slice(1); const parts=h
   else { if(view==='det'&&arg) arg=decId(arg); if(parts[2]) qs.from=parts[2]; }
   return {view, arg, qs}; }
 /* UPDATE BADGE - edit ONLY this line on every release (number goes up by 1, date = release day). Also bump CACHE_VERSION in service-worker.js. */
-const NF_UPDATE = {n:19, date:'Nov 11, 2026'};
+const NF_UPDATE = {n:20, date:'Nov 12, 2026'};
 /* ---- Connections | Shearblocks switch in the top bar (UPDATE 3) ---- */
 const NF_LAST = {conn:null, sw:null, tr:null};
 function nfMode(){ const v=(location.hash||'#home').slice(1).split('--')[0]; if(v===''||v==='home'||v==='start'||v==='lvl') return 'lv'; return /^sw/.test(v)?'sw':(/^tr/.test(v)?'tr':'conn'); }
@@ -952,7 +952,7 @@ function trLay(app,s,hl){ const g=trGroup(s); const m=hl&&s.marks[hl]; let init=
   if(m && m.pos && m.pos[0]){ const q=m.pos[0]; init={scale:6,x:((q[0]+q[2])/2)*s.layout_px[0],y:((q[1]+q[3])/2)*s.layout_px[1]}; }
   app.innerHTML=header({label:'Menu',fn:`go('#trsec--${s.id}')`},`Truss layout — ${esc(trName(s))}`,`${esc(trSub(s))} · ${trLvlLbl(g)}${hl?' · '+esc(hl):''}`,trStripe())+`
   <div class="wrap">
-    <div class="card"><h2>Layout sheet <small>Pinch to zoom, then tap a yellow box</small></h2><div class="viewer" id="v-trlay"></div>
+    <div class="card"><h2>Truss layout <small>Pinch to zoom, then tap a yellow box</small></h2><div class="viewer" id="v-trlay"></div>
       <div class="hint">Truss labels are small: zoom in first, or pick the truss from the list below.</div></div>
     <div class="card"><h2>Trusses in this section <small>${s._marks.length} marks</small></h2>
       <input class="srch" id="trfilter" placeholder="Filter (WF29, W4B…)" oninput="trFilter('${s.id}')" autocomplete="off" autocapitalize="characters">
