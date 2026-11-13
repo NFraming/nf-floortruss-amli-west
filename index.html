@@ -411,7 +411,7 @@ function parseRoute(){ const h=(location.hash||'#start').slice(1); const parts=h
   else { if(view==='det'&&arg) arg=decId(arg); if(parts[2]) qs.from=parts[2]; }
   return {view, arg, qs}; }
 /* UPDATE BADGE - edit ONLY this line on every release (number goes up by 1, date = release day). Also bump CACHE_VERSION in service-worker.js. */
-const NF_UPDATE = {n:26, date:'Nov 12, 2026'};
+const NF_UPDATE = {n:27, date:'Nov 12, 2026'};
 /* ---- Connections | Shearblocks switch in the top bar (UPDATE 3) ---- */
 const NF_LAST = {conn:null, sw:null, tr:null};
 function nfMode(){ const v=(location.hash||'#home').slice(1).split('--')[0]; if(v===''||v==='home'||v==='start'||v==='lvl') return 'lv'; return /^sw/.test(v)?'sw':(/^tr/.test(v)?'tr':'conn'); }
@@ -436,8 +436,8 @@ function render(){ document.body.classList.remove('nf-lock'); { const hb=documen
   else if(r.view==='how') renderHow(app);
   else if(r.view==='install') renderInstall(app);
   else if(r.view==='all'){ renderAll(app, r.qs); nfP6(app); }
-  else if(r.view==='swsec' && SEC_SW[r.arg]) renderSWSection(app, SEC_SW[r.arg], r.qs.level, r.qs);
-  else if(r.view==='swdet' && DET_SW[r.arg]) renderSWDetail(app, DET_SW[r.arg], r.qs.level, r.qs);
+  else if(r.view==='swsec' && SEC_SW[r.arg]){ renderSWSection(app, SEC_SW[r.arg], r.qs.level, r.qs); nfP6(app); }
+  else if(r.view==='swdet' && DET_SW[r.arg]){ renderSWDetail(app, DET_SW[r.arg], r.qs.level, r.qs); nfP6(app); }
   else if(r.view==='swall') renderSWAll(app, r.qs.level, r.qs);
   else if(r.view==='conn'){ renderConnHome(app); nfP6(app); }
   else if(r.view==='lvl') renderLevel(app, r.arg);
@@ -817,9 +817,9 @@ function renderSWSection(app, s, level, qs){ level = SWDATA.sw_levels.some(l=>l.
   setBB('home');
   const items=(s.conns||[]).map(c=>Object.assign({}, DET_SW[c.id], {plan_variants_here:c.variants})).sort((a,b)=>cmpId(a.id,b.id));
   const imgs=info.imgs||[];
-  app.innerHTML = header({label:'Shearblocks',fn:`go('#swall--${level}')`}, `Shearblocks — Section ${esc(s.label)}`, `${esc(s.bldg)} · ${esc(LVL.label)} · Sheet ${esc(info.page)} of ${LVL.pages}`, rgb(s.color)) + `
+  app.innerHTML = header({label:'Plan',fn:`go('#swall--${level}')`}, `Shear blocks — ${esc(s.label)}`, `${esc(s.bldg)} · ${esc(LVL.label)}`, rgb(s.color)) + `
   <div class="wrap">
-    <div class="card"><h2>Shear blocking sheet <small>Hoja de shear blocking – red = can be left out for plumbing (max 20%) · pinch to zoom / rojo = se puede dejar fuera para la plomería (máx. 20%) · pellizca para acercar</small></h2>
+    <div class="card"><h2>Shear blocking sheet <small>Sheet ${esc(info.page)} of ${LVL.pages} · Hoja de shear blocking – red = can be left out for plumbing (max 20%) · pinch to zoom / rojo = se puede dejar fuera para la plomería (máx. 20%) · pellizca para acercar</small></h2>
       ${imgs.length>1?`<div class="tabs">${imgs.map((im,k)=>`<button class="tab ${k===0?'on':''}" onclick="detTabSWSec(${k})">${esc(im.label)}</button>`).join('')}</div>`:''}
       <div class="viewer" id="v-sec"></div></div>
     ${items.length?`<div class="card"><h2>Blocks in this section <small>Cuadros en esta sección – ${items.length} types / tipos</small></h2>
@@ -828,7 +828,7 @@ function renderSWSection(app, s, level, qs){ level = SWDATA.sw_levels.some(l=>l.
   </div>`;
   window._swSecImgs = imgs.map(im=>im.img); detTabSWSec(0);
 }
-function detTabSWSec(k){ document.querySelectorAll('.tabs .tab').forEach((t,i)=>t.classList.toggle('on',i===k)); makeViewer(document.getElementById('v-sec'), window._swSecImgs[k]); }
+function detTabSWSec(k){ document.querySelectorAll('.tabs .tab').forEach((t,i)=>t.classList.toggle('on',i===k)); makeViewer(document.getElementById('v-sec'), window._swSecImgs[k], {noctl:true}); }
 function renderSWDetail(app, d, level, qs){ level = SWDATA.sw_levels.some(l=>l.id===level)?level:DEFAULT_SW_LEVEL;
   setBB('home');
   const from=qs.from||'swall'; const back= SEC_SW[from]?{label:'Section '+SEC_SW[from].label, fn:`go('#swsec--${level}--${from}')`}:{label:'List', fn:`go('#swall--${level}')`};
@@ -853,7 +853,7 @@ function renderSWDetail(app, d, level, qs){ level = SWDATA.sw_levels.some(l=>l.i
   </div>`;
   window._swDetImgs=d.imgs; detTabSW(0);
 }
-function detTabSW(k){ document.querySelectorAll('.tabs .tab').forEach((t,i)=>t.classList.toggle('on',i===k)); makeViewer(document.getElementById('v-det'), window._swDetImgs[k]); }
+function detTabSW(k){ document.querySelectorAll('.tabs .tab').forEach((t,i)=>t.classList.toggle('on',i===k)); makeViewer(document.getElementById('v-det'), window._swDetImgs[k], {noctl:true}); }
 function renderSWAll(app, level, qs){ setBB('home'); ovAll(app,'sw',level); }
 /* ===== UPDATE 7 (TEST COPY): Trusses tab - Allied Truss layouts + sealed design pages (Procore Submittal #277) =====
    Test copy only. Layouts + mark positions are cached by the service worker (always offline, decision D1-B).
