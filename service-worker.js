@@ -5,7 +5,7 @@
 //  2) IMAGES (IMG_CACHE, renamed ONLY when an image file changes): the plans and sheets. Cache-first. Images already on the
 //     phone are copied from the older caches on upgrade (no download); missing ones are fetched in the background and
 //     resume on the next open if the signal drops.
-const CACHE_VERSION = 'nf-floortruss-v2-36';
+const CACHE_VERSION = 'nf-floortruss-v2-37';
 const IMG_CACHE = 'nf-floortruss-img-1';
 const CACHE_PREFIX = 'nf-floortruss-';  // only caches with this prefix belong to this app
 const SEC_CACHE = 'nfft-trusses-sec';       // truss sections saved on demand (page script manages it)
@@ -179,7 +179,8 @@ const IMG_URLS = [
   "trusses/layouts/L567-3C.webp",
   "trusses/layouts/L567-4A.webp",
   "trusses/layouts/L567-4B.webp",
-  "trusses/layouts/L567-4C.webp"
+  "trusses/layouts/L567-4C.webp",
+  "trusses/layouts/L567-4D.webp"
 ];
 const SHELL_PATHS = new Set(SHELL_URLS.map((u) => new URL(u, self.location).pathname));
 const IMG_PATHS = new Set(IMG_URLS.map((u) => new URL(u, self.location).pathname));
