@@ -282,6 +282,8 @@ body[data-page="lvl"] [data-n="3"]::before{top:-9px;left:-6px}
 .mini{gap:3px;font-size:15px;white-space:nowrap}
 .mini .hg{font-size:26px;line-height:1;vertical-align:middle}
 .plan.big .lbl.pendl{border-color:#b91c1c !important;background:#fee2e2;color:#7f1d1d}
+.ovcap{margin:0 0 8px 0;text-align:center;font-weight:900;font-size:18px;color:#111827}.ovcap span{display:block;font-weight:600;font-size:13px;color:#374151}
+.ovtabs{display:flex;gap:6px;margin:0 0 8px 0}.ovtabs .tab{flex:1}
 .plan.big .lbl .hg{font-size:26px;line-height:1;vertical-align:middle}
 </style>
 </head>
@@ -409,7 +411,7 @@ function parseRoute(){ const h=(location.hash||'#start').slice(1); const parts=h
   else { if(view==='det'&&arg) arg=decId(arg); if(parts[2]) qs.from=parts[2]; }
   return {view, arg, qs}; }
 /* UPDATE BADGE - edit ONLY this line on every release (number goes up by 1, date = release day). Also bump CACHE_VERSION in service-worker.js. */
-const NF_UPDATE = {n:25, date:'Nov 12, 2026'};
+const NF_UPDATE = {n:26, date:'Nov 12, 2026'};
 /* ---- Connections | Shearblocks switch in the top bar (UPDATE 3) ---- */
 const NF_LAST = {conn:null, sw:null, tr:null};
 function nfMode(){ const v=(location.hash||'#home').slice(1).split('--')[0]; if(v===''||v==='home'||v==='start'||v==='lvl') return 'lv'; return /^sw/.test(v)?'sw':(/^tr/.test(v)?'tr':'conn'); }
@@ -563,30 +565,40 @@ function renderInstall(app){ setBB('');
     <div style="height:10px"></div><button class="btn" onclick="go('#start')">◀ Projects</button>
   </div>`;
 }
-function renderConnHome(app){ setBB('home'); const T=DATA.title; const fp=DATA.fullplan;
-  let labels=DATA.sections.map(s=>`<button class="lbl" style="left:${s.cx}%;top:${s.cy}%;border-color:${rgb(s.color)}" onclick="event.stopPropagation();go('#sec--${s.id}')">${esc(s.label)}</button>`).join('');
-  app.innerHTML = header({label:'Level 4',fn:"go('#lvl--4')"}, '4TH LEVEL – FLOOR TRUSS CONNECTIONS', T.job+' · '+T.company, '#d99a00') + `
+/* ---------- UPDATE 26 TEST: Connections / Shearblocks overall = same screen as Trusses overall (trAll) ---------- */
+const OV_ORDER=['3A','3B','3C','4A','4B','4C','4D','5AB'];
+function ovName(s){ return s.id==='5AB'?'Bldg 5':s.label; }
+function ovGo(mode,level,id){ return mode==='sw'?`go('#swsec--${level}--${id}')`:`go('#sec--${id}')`; }
+function ovAll(app,mode,level){ const sw=(mode==='sw'); if(sw) level=SWDATA.sw_levels.some(l=>l.id===level)?level:DEFAULT_SW_LEVEL;
+  const ready=x=> sw?!!((SWDATA.sw_imgs[level]||{})[x.id]):!!SEC[x.id];
+  const labels=DATA.sections.map(x=>{ const ok=ready(x); return `<button class="lbl${ok?'':' pendl'}" style="left:${x.cx}%;top:${x.cy}%;border-color:${rgb(x.color)}" onclick="event.stopPropagation();${ovGo(mode,level,x.id)}">${esc(ovName(x))}${ok?'':' <span class="hg">⏳</span>'}</button>`; }).join('');
+  const grid=OV_ORDER.map(id=>DATA.sections.find(x=>x.id===id)).filter(Boolean).map(x=>{ const ok=ready(x); return `<button class="mini ${ok?'ok':'pend'}" onclick="${ovGo(mode,level,x.id)}" aria-label="${esc(ovName(x))} ${ok?'ready':'pending'}"><span class="n">${esc(ovName(x))}</span><span class="st">${ok?'✔':'<span class="hg">⏳</span>'}</span></button>`; }).join('');
+  const cap= sw ? `<div class="ovcap">Shear blocks locations<span>Bloqueo de corte · ${esc(SWDATA.sw_levels.find(l=>l.id===level).label)}</span></div>` : `<div class="ovcap">Truss connections<span>Conexiones de trusses · 4th Level</span></div>`;
+  const tabs= sw ? `<div class="ovtabs">${SWDATA.sw_levels.map(l=>`<button class="tab ${l.id===level?'on':''}" onclick="go('#swall--${l.id}')">${esc(l.short)}</button>`).join('')}</div>` : '';
+  const extra= sw ? '' : `<div class="card"><button class="btn sec" onclick="go('#all')">📋 All connection details (${DATA.details.length} sheets) · Todos los detalles</button></div>`;
+  const notes=`<div class="card"><details class="notes"><summary>Notes from the plan · Notas del plano</summary><ol>${DATA.notes.map(n=>`<li>${esc(n.en)}<span class="es">${esc(n.es)}</span></li>`).join('')}</ol></details></div>`;
+  const foot= sw ? `Built from "${esc(SWDATA.sw_levels.find(l=>l.id===level).source_pdf)}".` : 'Built from "4th Level - Floor Truss Connections - AMLI West.pdf" (111 pages, 30/10/26). National Framing · 2026-11-02.';
+  app.innerHTML=header({label:'Home',fn:"go('#home')"},'','',trStripe())+`
   <div class="wrap">
-    <div class="card title-card"><img src="header-logo.png" alt="National Framing Inc" style="height:46px;width:auto;border-radius:8px;margin-bottom:10px;display:block"><div class="big">4th Level – Floor Truss Connections</div><div class="sub">${esc(T.job)} · West Building · Buildings #3, #4 and #5</div><div class="meta">${esc(T.company)} · Rev 1 · ${esc(T.date)} · Created by ${esc(T.author)} · Phone version v1 (2026-11-02)</div></div>
-    <div class="card"><h2>Full plan – 4th level <small>Plano completo – nivel 4. Tap a section / Toca una sección.</small></h2>
-      <div class="plan" id="plan" onclick="planTap(event)"><img id="planimg" src="${imgSrc('fullplan')}" alt="Full plan">${labels}</div>
-      <div class="legend">${DATA.sections.map(s=>`<span class="pill" onclick="go('#sec--${s.id}')"><span class="dot" style="background:${rgb(s.color)}"></span>${esc(s.label)}</span>`).join('')}</div>
-      <div class="hint">Each colour = one section sheet (8 sheets). The connection colours inside each sheet are the ones from the plan. / Cada color = una hoja de sección (8 hojas). Los colores de las conexiones dentro de cada hoja son los del plano.</div>
-    </div>
-    <div class="card" id="secs"><h2>Sections <small>Secciones – buttons / botones</small></h2>
-      <div class="grid">${DATA.sections.map(s=>`<button class="sbtn" onclick="go('#sec--${s.id}')"><span class="sw" style="background:${rgb(s.color)}"></span><span><div class="n">${esc(s.label)}</div><div class="b">${esc(s.bldg)}</div><div class="b">${s.ntypes} connection types · ${s.ncallouts} callouts</div></span></button>`).join('')}</div>
-    </div>
-    <div class="card"><h2>All connection details <small>Todos los detalles de conexión (${DATA.details.length} sheets)</small></h2>
-      <button class="btn" onclick="go('#all')">Open the full list → · Abrir la lista completa</button>
-    </div>
-    <div class="card"><h2>Shearblocks <small>Bloqueo de corte — paredes con problema de plomería · 4th/5th/6th level</small></h2>
-      <button class="btn" onclick="go('#swall--4th')">Open · Abrir</button>
-      <div class="hint">Shear blocking marked in red = can be left out for plumbing (max 20% on W1/W3/W5 walls). Now covers 4th, 5th and 6th level. From the "Shear Blocking Interference" sheets (Jorge Lugo, Rev2). / Shear blocking marcado en rojo = se puede dejar fuera para la plomería (máximo 20% en muros W1/W3/W5). Ahora incluye 4to, 5to y 6to nivel. De las hojas "Shear Blocking Interference" (Jorge Lugo, Rev2).</div>
-    </div>
-    <div class="card"><details class="notes"><div class="card"><details class="notes"><summary>Notes from the plan · Notas del plano</summary><ol>${DATA.notes.map(n=>`<li>${esc(n.en)}<span class="es">${esc(n.es)}</span></li>`).join('')}</ol></details></div>
-    <div class="foot">Built from "4th Level - Floor Truss Connections - AMLI West.pdf" (111 pages, 30/10/26). National Framing · 2026-11-02.</div>
+    <button class="nfstat c" id="nfstat" onclick="nfCheck()" aria-label="Update status">UPDATE ${NF_UPDATE.n} · ${NF_UPDATE.date}</button>
+    ${cap}${tabs}
+    <div class="plan big" id="planOV" onclick="planTapOV(event,'${mode}','${level||''}')"><img id="planimgOV" src="${imgSrc('fullplan')}" alt="Full plan">${labels}</div>
+    <div class="minigrid">${grid}</div>
+    ${extra}${notes}
+    <div class="foot">${foot}</div>
   </div>`;
-}
+  const hd=app.querySelector('.hdr'); if(hd){ hd.classList.add('notitle'); const ub=hd.querySelector('.updbar'); if(ub) ub.remove(); }
+  const bb=document.getElementById('bottombar'); if(bb) bb.style.display='none';
+  nfCheck(); }
+function planTapOV(ev,mode,level){ const img=document.getElementById('planimgOV'); const r=img.getBoundingClientRect();
+  const x=(ev.clientX-r.left)/r.width, y=(ev.clientY-r.top)/r.height; if(x<0||y<0||x>1||y>1) return;
+  const done=(c)=>{ const W=c.width,H=c.height; const px=c.getContext('2d').getImageData(Math.floor(x*W),Math.floor(y*H),1,1).data[0]; let k=0;
+    if(px>0 && DATA.sections[px-1]) k=px; else { const d=c.getContext('2d').getImageData(Math.max(0,Math.floor(x*W)-12),Math.max(0,Math.floor(y*H)-12),24,24).data; const cnt={}; for(let i=0;i<d.length;i+=4){ if(d[i]>0) cnt[d[i]]=(cnt[d[i]]||0)+1; } let bn=0; for(const q in cnt){ if(cnt[q]>bn){bn=cnt[q];k=+q;} } }
+    if(k>0 && DATA.sections[k-1]) go(mode==='sw'?'#swsec--'+level+'--'+DATA.sections[k-1].id:'#sec--'+DATA.sections[k-1].id); };
+  if(idxCanvas){ done(idxCanvas); return; }
+  const im=new Image(); im.onload=()=>{ const c=document.createElement('canvas'); c.width=im.naturalWidth; c.height=im.naturalHeight; c.getContext('2d').drawImage(im,0,0); idxCanvas=c; done(c); }; im.src=imgSrc('fullplan_index'); }
+function renderConnHome(app){ setBB('home'); ovAll(app,'conn'); }
+
 /* ---- UPDATE 7 TEST v3: Home = level buttons (3-7) -> file types of that level ---- */
 const NF_LEVELS=[
   {n:3, tr:null,  conn:false, sw:null},
@@ -842,22 +854,7 @@ function renderSWDetail(app, d, level, qs){ level = SWDATA.sw_levels.some(l=>l.i
   window._swDetImgs=d.imgs; detTabSW(0);
 }
 function detTabSW(k){ document.querySelectorAll('.tabs .tab').forEach((t,i)=>t.classList.toggle('on',i===k)); makeViewer(document.getElementById('v-det'), window._swDetImgs[k]); }
-function renderSWAll(app, level, qs){ level = SWDATA.sw_levels.some(l=>l.id===level)?level:DEFAULT_SW_LEVEL; setBB('home');
-  const LVL=SWDATA.sw_levels.find(l=>l.id===level);
-  let labels=SWDATA.sw_sections.map(s=>`<button class="lbl" style="left:${s.cx}%;top:${s.cy}%;border-color:${rgb(s.color)}" onclick="event.stopPropagation();go('#swsec--${level}--${s.id}')">${esc(s.label)}</button>`).join('');
-  let lvltabs=SWDATA.sw_levels.map(l=>`<button class="tab ${l.id===level?'on':''}" onclick="go('#swall--${l.id}')">${esc(l.short)}</button>`).join('');
-  app.innerHTML = header({label:'Level',fn:"go('#lvl--"+parseInt(level)+"')"}, 'SHEARBLOCKS', `Shear blocking interference — ${esc(LVL.label)}`, '#d99a00') + `
-  <div class="wrap">
-    <div class="card"><h2>Level <small>Nivel — tap to switch / toca para cambiar</small></h2><div class="tabs">${lvltabs}</div></div>
-    <div class="card"><h2>Overall plan — 8 sections <small>Plano completo – 8 secciones. Tap a section / Toca una sección.</small></h2>
-      <div class="plan" id="planSW" onclick="planTapSW(event,'${level}')"><img id="planimgSW" src="${imgSrc('fullplan')}" alt="Full plan">${labels}</div>
-      <div class="legend">${SWDATA.sw_sections.map(s=>`<span class="pill" onclick="go('#swsec--${level}--${s.id}')"><span class="dot" style="background:${rgb(s.color)}"></span>${esc(s.label)}</span>`).join('')}</div>
-      <div class="hint">Same 8 sections as the Floor Truss Connections plan. Tap one to see its shear-blocking sheet with the red marks. The "5A/5B" section shows 2 sheets on 5th/6th level. / Mismas 8 secciones que el plano de Floor Truss Connections. Toca una para ver su hoja de shear blocking con las marcas rojas. La sección "5A/5B" muestra 2 hojas en 5to/6to nivel.</div>
-    </div>
-    <div class="card"><details class="notes"><summary>Notes from the plan · Notas del plano</summary><ol>${SWDATA.notes.map(n=>`<li>${esc(n.en)}<span class="es">${esc(n.es)}</span></li>`).join('')}</ol></details></div>
-    <div class="foot">Built from "${esc(LVL.source_pdf)}".</div>
-  </div>`;
-}
+function renderSWAll(app, level, qs){ setBB('home'); ovAll(app,'sw',level); }
 /* ===== UPDATE 7 (TEST COPY): Trusses tab - Allied Truss layouts + sealed design pages (Procore Submittal #277) =====
    Test copy only. Layouts + mark positions are cached by the service worker (always offline, decision D1-B).
    Truss design pages are saved per section on demand ("Save this section offline") into the Cache API. */
