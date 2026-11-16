@@ -5,7 +5,7 @@
 //  2) IMAGES (IMG_CACHE, renamed ONLY when an image file changes): the plans and sheets. Cache-first. Images already on the
 //     phone are copied from the older caches on upgrade (no download); missing ones are fetched in the background and
 //     resume on the next open if the signal drops.
-const CACHE_VERSION = 'nf-floortruss-v2-40';
+const CACHE_VERSION = 'nf-floortruss-v2-41';
 const IMG_CACHE = 'nf-floortruss-img-1';
 const CACHE_PREFIX = 'nf-floortruss-';  // only caches with this prefix belong to this app
 const SEC_CACHE = 'nfft-trusses-sec';       // truss sections saved on demand (page script manages it)
@@ -262,10 +262,16 @@ const IMG_URLS = [
   "img/c6_sec9_hq.webp",
   "img/fullplan.webp",
   "img/fullplan_index.png",
-  "img/how1.webp",
-  "img/how2.webp",
-  "img/how3.webp",
-  "img/how4.webp",
+  "img/how32_1.webp",
+  "img/how32_2.webp",
+  "img/how32_3.webp",
+  "img/how32_4.webp",
+  "img/how32_5a.webp",
+  "img/how32_5b.webp",
+  "img/how32_6a.webp",
+  "img/how32_6b.webp",
+  "img/how32_7.webp",
+  "img/how32_8.webp",
   "img/p009.webp",
   "img/p010.webp",
   "img/p011.webp",
