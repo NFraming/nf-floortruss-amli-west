@@ -5,7 +5,7 @@
 //  2) IMAGES (IMG_CACHE, renamed ONLY when an image file changes): the plans and sheets. Cache-first. Images already on the
 //     phone are copied from the older caches on upgrade (no download); missing ones are fetched in the background and
 //     resume on the next open if the signal drops.
-const CACHE_VERSION = 'nf-floortruss-v2-39';
+const CACHE_VERSION = 'nf-floortruss-v2-40';
 const IMG_CACHE = 'nf-floortruss-img-1';
 const CACHE_PREFIX = 'nf-floortruss-';  // only caches with this prefix belong to this app
 const SEC_CACHE = 'nfft-trusses-sec';       // truss sections saved on demand (page script manages it)
@@ -491,6 +491,7 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.endsWith('/version.json')) { event.respondWith(fetch(req, { cache: 'no-store' })); return; }   // UPDATE 31: always live, never cached
   if (req.mode === 'navigate' || SHELL_PATHS.has(url.pathname)) { event.respondWith(shellFirst(req)); return; }
   event.respondWith(
     caches.match(req).then((cached) => {
